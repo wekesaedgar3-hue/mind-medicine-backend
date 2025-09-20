@@ -54,12 +54,15 @@ sequelize
   .sync({ alter: true }) // ✅ auto-update tables to match models
   .then(() => {
     console.log("✅ Database connected and models synced (with alter)");
-    const PORT = process.env.PORT || 5000; // ✅ use Render’s PORT
-    app.listen(PORT, () =>
-      console.log(`🚀 Server running on port ${PORT}`)
-    );
+
+    // ✅ Use Render’s PORT dynamically
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
+
 
 
 
