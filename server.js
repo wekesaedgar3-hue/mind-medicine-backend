@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
+const fs = require("fs");
 const sequelize = require("./config/db");
 
 // Load environment variables
@@ -15,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads")); // ✅ serve uploaded files
 
-// Serve frontend static files (put your frontend inside "public" folder)
+// Serve frontend static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // Import Models
@@ -36,9 +37,15 @@ app.use("/api/packages", packageRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
 
-// ✅ Fallback route for SPA (Express 5 fix)
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+// ✅ Fallback route for serving index.html safely
+app.get("*", (req, res) => {
+  const indexPath = path.join(__dirname, "public", "index.html");
+
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send("index.html not found");
+  }
 });
 
 // Global Error Handler
@@ -55,7 +62,6 @@ sequelize
   .then(() => {
     console.log("✅ Database connected and models synced (with alter)");
 
-    // ✅ Use Render’s PORT dynamically
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
