@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mind and Medicine Holidays</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+    }
+    header {
+      position: relative;
+      height: 100vh;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    #bgVideo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+    .overlay-content {
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 10px;
+      background: teal;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .services, .packages, .about, .booking {
+      padding: 30px;
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .card {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    .package-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .package-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    footer {
+      background: #222;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    footer a {
+      color: #1abc9c;
+      margin: 0 8px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🌊 Header with Background Video -->
+  <header>
+    <video autoplay muted loop playsinline id="bgVideo">
+      <source src="../images/beach.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+    <div class="overlay-content">
+      <h1>Mind and Medicine Holidays</h1>
+      <p>Discover wellness, travel, and healing in one place.</p>
+      <button class="btn" id="loginBtn">Login</button>
+      <button class="btn" id="registerBtn">Register</button>
+    </div>
+  </header>
+
+  <section class="services">
+    <h2>Our Services</h2>
+    <div class="grid">
+      <div class="card">
+        <img src="../images/wellness.JPG" alt="Wellness Retreats">
+        <h4>Wellness Retreats</h4>
+        <button class="btn serviceBtn">Access</button>
+      </div>
+      <div class="card">
+        <img src="../images/medical.JPG" alt="Medical Tourism">
+        <h4>Medical Tourism</h4>
+        <button class="btn serviceBtn">Access</button>
+      </div>
+      <div class="card">
+        <img src="../images/yoga.JPG" alt="Holistic Healing">
+        <h4>Holistic Healing</h4>
+        <button class="btn serviceBtn">Access</button>
+      </div>
+      <div class="card">
+        <img src="../images/adventure.JPG" alt="Adventure and Mindfulness">
+        <h4>Adventure & Mindfulness</h4>
+        <button class="btn serviceBtn">Access</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="packages">
+    <h2>Holiday Packages</h2>
+    <div class="grid">
+      <div class="package-card">
+        <img src="https://via.placeholder.com/300x200?text=Retreat" alt="Retreat">
+        <h3>Mombasa Retreat</h3>
+        <p>$500</p>
+        <button class="btn bookBtn" data-package="Mombasa Retreat">Book Now</button>
+      </div>
+      <div class="package-card">
+        <img src="https://via.placeholder.com/300x200?text=Safari" alt="Safari">
+        <h3>Safari & Healing</h3>
+        <p>$750</p>
+        <button class="btn bookBtn" data-package="Safari & Healing">Book Now</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="about">
+    <h2>About Us</h2>
+    <p>We bring together medical care, spiritual growth, adventure, and relaxation in one tailored experience.</p>
+  </section>
+
+  <section class="booking">
+    <h2>Ready to Start?</h2>
+    <button class="btn" id="startBookingBtn">Plan & Book</button>
+  </section>
+
+  <footer>
+    <p>Contact Us: +254 712 345 678 | info@mindandmedicine.com</p>
+    <a href="#">WhatsApp</a> |
+    <a href="#">Instagram</a> |
+    <a href="#">X</a> |
+    <a href="login.html" id="adminLoginLink">Admin Login</a>
+  </footer>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    // ✅ Render backend base URL
+    const API_BASE_URL = "https://your-backend.onrender.com";
+
+    function requireLogin(){
+      if(!token){
+        alert("⚠️ Please login to access this service.");
+        window.location.href = "login.html";
+        return false;
+      }
+      return true;
+    }
+
+    // Login/Register buttons
+    document.getElementById("loginBtn").onclick = () => window.location.href="login.html";
+    document.getElementById("registerBtn").onclick = () => window.location.href="register.html";
+
+    // Admin Login
+    document.getElementById("adminLoginLink").onclick = (e) => {
+      if(!token || role !== "admin"){
+        e.preventDefault();
+        alert("⚠️ Admin login required.");
+        window.location.href = "login.html";
+      }
+    }
+
+    // Service buttons
+    document.querySelectorAll(".serviceBtn").forEach(btn => {
+      btn.onclick = () => {
+        if(requireLogin()){
+          alert("✅ Access granted to service!");
+        }
+      };
+    });
+
+    // Booking buttons
+    document.querySelectorAll(".bookBtn").forEach(btn => {
+      btn.onclick = () => {
+        if(requireLogin()){
+          const packageName = btn.getAttribute("data-package");
+          localStorage.setItem("selectedPackage", packageName);
+          window.location.href = "user-dashboard.html";
+        }
+      };
+    });
+
+    document.getElementById("startBookingBtn").onclick = () => {
+      if(requireLogin()){
+        window.location.href = "user-dashboard.html";
+      }
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+

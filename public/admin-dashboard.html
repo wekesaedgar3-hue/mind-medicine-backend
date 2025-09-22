@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css"> <!-- if you later move CSS -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+    }
+
+    nav {
+      width: 220px;
+      background: #2c3e50;
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    nav h3 {
+      margin-top: 0;
+    }
+
+    nav a {
+      color: white;
+      display: block;
+      margin: 15px 0;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      background: #f4f4f4;
+      min-height: 100vh;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px gray;
+      max-width: 500px;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: teal;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: darkcyan;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h3>Admin Panel</h3>
+    <a onclick="showSection('packagesSection')">Manage Packages</a>
+    <a onclick="showSection('activitiesSection')">Manage Activities</a>
+    <a onclick="logout()">Logout</a>
+  </nav>
+
+  <div class="content">
+    <!-- Packages Upload -->
+    <div id="packagesSection" class="section active">
+      <h2>Upload Package</h2>
+      <form id="uploadPackageForm" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Package Title" required />
+        <input type="number" name="price" placeholder="Price" required />
+        <input type="file" name="image" accept="image/*" required />
+        <button type="submit">Upload Package</button>
+      </form>
+    </div>
+
+    <!-- Activities Upload -->
+    <div id="activitiesSection" class="section">
+      <h2>Upload Activity</h2>
+      <form id="uploadActivityForm" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Activity Name" required />
+        <textarea name="description" placeholder="Description" required></textarea>
+        <input type="text" name="location" placeholder="Location (optional)" />
+        <input type="file" name="image" accept="image/*" required />
+        <button type="submit">Upload Activity</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "admin") {
+      alert("You must be logged in as an admin to access this page!");
+      window.location.href = "/login.html";
+    }
+
+    function showSection(id) {
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    // Upload Package
+    document.getElementById("uploadPackageForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch("/api/packages", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      if (res.ok) {
+        alert("Package uploaded successfully!");
+        this.reset();
+      } else {
+        alert("Package upload failed!");
+      }
+    });
+
+    // Upload Activity
+    document.getElementById("uploadActivityForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch("/api/activities", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      if (res.ok) {
+        alert("Activity uploaded successfully!");
+        this.reset();
+      } else {
+        alert("Activity upload failed!");
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      window.location.href = "/login.html";
+    }
+  </script>
+</body>
+</html>
+

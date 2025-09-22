@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      background: linear-gradient(to right, #2c3e50, #3498db);
+    }
+
+    nav {
+      width: 250px;
+      background: rgba(44, 62, 80, 0.9);
+      backdrop-filter: blur(8px);
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.4);
+    }
+    nav h3 {
+      margin-top: 0;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      display: block;
+      margin: 15px 0;
+      padding: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      min-height: 100vh;
+      color: white;
+      overflow-y: auto;
+    }
+
+    h2 {
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+      padding-bottom: 8px;
+    }
+
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.02);
+    }
+    img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin-top: 10px;
+      cursor: pointer;
+      background: #1abc9c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #16a085;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h3>User Dashboard</h3>
+    <a onclick="showSection('packagesSection')">📦 Packages</a>
+    <a onclick="showSection('activitiesSection')">🎯 Activities</a>
+
+    <!-- Admin-only tabs -->
+    <div id="adminTabs" style="display:none;">
+      <a onclick="showSection('addPackageSection')">➕ Add Package</a>
+      <a onclick="showSection('addActivitySection')">➕ Add Activity</a>
+      <a onclick="showSection('bookingsSection')">📑 Bookings</a>
+    </div>
+
+    <a onclick="logout()">🚪 Logout</a>
+  </nav>
+
+  <div class="content">
+    <!-- User sections -->
+    <div id="packagesSection" class="section active">
+      <h2>Available Packages</h2>
+      <div id="packagesList"></div>
+    </div>
+
+    <div id="activitiesSection" class="section">
+      <h2>Available Activities</h2>
+      <div id="activitiesList"></div>
+    </div>
+
+    <!-- Admin sections -->
+    <div id="addPackageSection" class="section">
+      <h2>Add Package</h2>
+      <form id="addPackageForm" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Package Title" required><br><br>
+        <input type="number" name="price" placeholder="Price" required><br><br>
+        <input type="file" name="image" accept="image/*" required><br><br>
+        <button type="submit">Upload Package</button>
+      </form>
+    </div>
+
+    <div id="addActivitySection" class="section">
+      <h2>Add Activity</h2>
+      <form id="addActivityForm" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Activity Name" required><br><br>
+        <input type="text" name="description" placeholder="Activity Description" required><br><br>
+        <input type="file" name="image" accept="image/*" required><br><br>
+        <button type="submit">Upload Activity</button>
+      </form>
+    </div>
+
+    <div id="bookingsSection" class="section">
+      <h2>All Bookings</h2>
+      <div id="bookingsList"></div>
+    </div>
+  </div>
+
+  <script>
+    // 👇 Change this URL after deploying your backend on Render
+    const backendUrl = "https://my-travel-backend.onrender.com";
+
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if(!token){
+      alert("You must be logged in!");
+      window.location.href = "login.html";
+    }
+
+    // Show admin tabs if role is admin
+    if(role === "admin"){
+      document.getElementById("adminTabs").style.display = "block";
+    }
+
+    function showSection(id){
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+
+      if(id === 'packagesSection') loadPackages();
+      if(id === 'activitiesSection') loadActivities();
+      if(id === 'bookingsSection') loadBookings();
+    }
+
+    async function loadPackages(){
+      const res = await fetch(`${backendUrl}/api/packages`, { headers: { Authorization: `Bearer ${token}` } });
+      const packages = await res.json();
+      const container = document.getElementById("packagesList");
+      container.innerHTML = "";
+      packages.forEach(p => {
+        const div = document.createElement("div");
+        div.classList.add("card");
+        div.innerHTML = `
+          <h3>${p.title}</h3>
+          <img src="${backendUrl}${p.image}" alt="${p.title}">
+          <p><strong>Price:</strong> $${p.price}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function loadActivities(){
+      const res = await fetch(`${backendUrl}/api/activities`, { headers: { Authorization: `Bearer ${token}` } });
+      const activities = await res.json();
+      const container = document.getElementById("activitiesList");
+      container.innerHTML = "";
+      activities.forEach(a => {
+        const div = document.createElement("div");
+        div.classList.add("card");
+        div.innerHTML = `
+          <h3>${a.name}</h3>
+          <img src="${backendUrl}${a.image}" alt="${a.name}">
+          <p>${a.description}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function loadBookings(){
+      const res = await fetch(`${backendUrl}/api/bookings`, { headers: { Authorization: `Bearer ${token}` } });
+      const bookings = await res.json();
+      const container = document.getElementById("bookingsList");
+      container.innerHTML = "";
+      bookings.forEach(b => {
+        const div = document.createElement("div");
+        div.classList.add("card");
+        div.innerHTML = `
+          <h3>Booking #${b.id}</h3>
+          <p><strong>User:</strong> ${b.userName}</p>
+          <p><strong>Package:</strong> ${b.packageTitle}</p>
+          <p><strong>Date:</strong> ${b.date}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Handle package upload
+    document.getElementById("addPackageForm")?.addEventListener("submit", async function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch(`${backendUrl}/api/packages`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      if(res.ok){ alert("Package uploaded!"); this.reset(); }
+      else { alert("Failed to upload package."); }
+    });
+
+    // Handle activity upload
+    document.getElementById("addActivityForm")?.addEventListener("submit", async function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch(`${backendUrl}/api/activities`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      if(res.ok){ alert("Activity uploaded!"); this.reset(); }
+      else { alert("Failed to upload activity."); }
+    });
+
+    function logout(){
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+
+    loadPackages();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
