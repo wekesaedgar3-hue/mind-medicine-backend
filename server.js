@@ -39,7 +39,7 @@ app.use("/api/packages", packageRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
 
-// ✅ Fallback route for SPA (Express v5 safe)
+// ✅ Fallback route for SPA (so React/Vanilla frontend routes work)
 app.use((req, res) => {
   const indexPath = path.join(__dirname, "public", "index.html");
   if (fs.existsSync(indexPath)) {
@@ -63,12 +63,14 @@ sequelize
   .then(() => {
     console.log("✅ Database connected and models synced (with alter)");
 
+    // ✅ Use Render’s dynamic PORT if available
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
+
 
 
 
