@@ -57,19 +57,21 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Sync DB and start server
+// ✅ Sync DB and start server
 sequelize
   .sync({ alter: true })
   .then(() => {
     console.log("✅ Database connected and models synced (with alter)");
 
-    // ✅ Use Render’s dynamic PORT if available
+    // ✅ Use Render’s dynamic PORT if available, and listen on 0.0.0.0
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
+
+
 
 
 
