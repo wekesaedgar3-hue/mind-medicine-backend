@@ -1,4 +1,3 @@
-// mind-medicine-backend/server.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -14,10 +13,13 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static("uploads")); // ✅ serve uploaded files
+
+// Serve uploaded files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Serve frontend static files
-app.use(express.static(path.join(__dirname, "public")));
+const publicPath = path.join(__dirname, "public");
+app.use(express.static(publicPath));
 
 // Import Models
 require("./models/User");
@@ -37,10 +39,9 @@ app.use("/api/packages", packageRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
 
-// ✅ Fallback route for serving index.html safely
-app.get("*", (req, res) => {
+// ✅ Fallback route for SPA (Express v5 safe)
+app.use((req, res) => {
   const indexPath = path.join(__dirname, "public", "index.html");
-
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
@@ -58,7 +59,7 @@ app.use((err, req, res, next) => {
 
 // Sync DB and start server
 sequelize
-  .sync({ alter: true }) // ✅ auto-update tables to match models
+  .sync({ alter: true })
   .then(() => {
     console.log("✅ Database connected and models synced (with alter)");
 
