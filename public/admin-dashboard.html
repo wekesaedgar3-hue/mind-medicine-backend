@@ -4,75 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="/css/style.css"> <!-- if you later move CSS -->
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      display: flex;
-    }
-
-    nav {
-      width: 220px;
-      background: #2c3e50;
-      color: white;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    nav h3 {
-      margin-top: 0;
-    }
-
-    nav a {
-      color: white;
-      display: block;
-      margin: 15px 0;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .content {
-      flex: 1;
-      padding: 30px;
-      background: #f4f4f4;
-      min-height: 100vh;
-    }
-
-    .section {
-      display: none;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px gray;
-      max-width: 500px;
-    }
-
-    input, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      background: teal;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: darkcyan;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; display: flex; }
+    nav { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
+    nav h3 { margin-top: 0; }
+    nav a { color: white; display: block; margin: 15px 0; text-decoration: none; cursor: pointer; }
+    .content { flex: 1; padding: 30px; background: #f4f4f4; min-height: 100vh; }
+    .section { display: none; }
+    .section.active { display: block; }
+    form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 5px gray; max-width: 500px; }
+    input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: teal; color: white; border: none; cursor: pointer; }
+    button:hover { background: darkcyan; }
   </style>
 </head>
 <body>
@@ -109,12 +52,13 @@
   </div>
 
   <script>
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
+    const API_BASE_URL = "https://mindandmedicineholidays.onrender.com";
+    const token = localStorage.getItem("adminToken");
+    const role = localStorage.getItem("adminRole");
 
     if (!token || role !== "admin") {
       alert("You must be logged in as an admin to access this page!");
-      window.location.href = "/login.html";
+      window.location.href = "admin-login.html";
     }
 
     function showSection(id) {
@@ -126,17 +70,18 @@
     document.getElementById("uploadPackageForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const formData = new FormData(this);
-      const res = await fetch("/api/packages", {
+      const res = await fetch(`${API_BASE_URL}/api/packages`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData
       });
 
       if (res.ok) {
-        alert("Package uploaded successfully!");
+        alert("✅ Package uploaded successfully!");
         this.reset();
       } else {
-        alert("Package upload failed!");
+        const err = await res.text();
+        alert("❌ Package upload failed! " + err);
       }
     });
 
@@ -144,26 +89,29 @@
     document.getElementById("uploadActivityForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const formData = new FormData(this);
-      const res = await fetch("/api/activities", {
+      const res = await fetch(`${API_BASE_URL}/api/activities`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData
       });
 
       if (res.ok) {
-        alert("Activity uploaded successfully!");
+        alert("✅ Activity uploaded successfully!");
         this.reset();
       } else {
-        alert("Activity upload failed!");
+        const err = await res.text();
+        alert("❌ Activity upload failed! " + err);
       }
     });
 
     function logout() {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      window.location.href = "/login.html";
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminRole");
+      window.location.href = "admin-login.html";
     }
   </script>
 </body>
 </html>
+
+
 
