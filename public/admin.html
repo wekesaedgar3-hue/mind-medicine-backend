@@ -59,11 +59,13 @@
   </div>
 
   <script>
-    const API_BASE = "https://mind-medicine-backend.onrender.com";
+    // ✅ Use your live backend URL
+    const API_BASE = "https://mindandmedicineholidays.onrender.com";
     const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
 
-    if (!token) {
-      alert("Please login first!");
+    if (!token || role !== "admin") {
+      alert("You must be logged in as an admin to access this page!");
       window.location.href = "login.html";
     }
 
@@ -117,7 +119,8 @@
         alert("✅ Package added successfully!");
         this.reset();
       } else {
-        alert("❌ Package upload failed!");
+        const err = await res.text();
+        alert("❌ Package upload failed! " + err);
       }
     });
 
@@ -134,17 +137,20 @@
         alert("✅ Activity uploaded successfully!");
         this.reset();
       } else {
-        alert("❌ Upload failed!");
+        const err = await res.text();
+        alert("❌ Activity upload failed! " + err);
       }
     });
 
     function logout() {
       localStorage.removeItem("token");
+      localStorage.removeItem("role");
       window.location.href = "login.html";
     }
   </script>
 </body>
 </html>
+
 
 
 
