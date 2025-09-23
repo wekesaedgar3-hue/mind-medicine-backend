@@ -2,7 +2,7 @@ const express = require("express");
 const Booking = require("../models/Booking");
 const User = require("../models/User");
 const Package = require("../models/Package");
-const upload = require("../middleware/upload");
+const upload = require("../middleware/uploadPackages");
 
 const router = express.Router();
 

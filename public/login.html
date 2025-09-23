@@ -76,27 +76,27 @@
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
       const errorMsg = document.getElementById("errorMsg");
-      errorMsg.textContent = ""; // Clear previous error
+      errorMsg.textContent = "";
 
       try {
-        // ✅ Use relative path so it works locally & on Render
         const res = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password })
         });
 
         const data = await res.json();
 
         if (res.ok && data.token) {
-          // Save token & user info
+          // Save token & role for future access
           localStorage.setItem("token", data.token);
+          localStorage.setItem("role", data.user.role);
           localStorage.setItem("user", JSON.stringify(data.user));
 
-          // ✅ Role-based redirect
+          // Redirect based on role
           if (data.user.role === "admin") {
             window.location.href = "admin-dashboard.html";
           } else {
@@ -112,6 +112,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 

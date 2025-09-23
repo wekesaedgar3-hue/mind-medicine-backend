@@ -1,6 +1,6 @@
 const express = require("express");
 const Activity = require("../models/Activity");
-const upload = require("../middleware/upload"); // ✅ Multer middleware
+const upload = require("../middleware/uploadPackages"); // ✅ Multer middleware
 
 const router = express.Router();
 
