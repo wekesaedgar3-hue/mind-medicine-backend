@@ -32,12 +32,14 @@ const authRoutes = require("./routes/authRoutes");
 const packageRoutes = require("./routes/packageRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const adminRoutes = require("./routes/adminRoutes"); // ✅ import admin routes
 
 // Mount Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/packages", packageRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/admin", adminRoutes); // ✅ mount admin routes
 
 // ✅ Fallback route for SPA (so React/Vanilla frontend routes work)
 app.use((req, res) => {
@@ -70,6 +72,7 @@ sequelize
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
+
 
 
 
