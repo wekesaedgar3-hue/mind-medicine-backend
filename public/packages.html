@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Packages</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { text-align: center; }
+    #packagesContainer { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+    .package-card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      width: 250px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      background: #fff;
+    }
+    .package-card img { max-width: 100%; border-radius: 5px; margin-bottom: 10px; }
+    .package-card h3 { margin: 10px 0 5px; }
+    .package-card p { margin: 5px 0; }
+    .package-card .price { font-weight: bold; color: teal; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Available Packages</h1>
+  <div id="packagesContainer">
+    <p>Loading packages...</p>
+  </div>
+
+  <script>
+    const packagesContainer = document.getElementById("packagesContainer");
+
+    async function loadPackages() {
+      try {
+        const res = await fetch("https://mindandmedicineholidays.onrender.com/api/packages");
+        if (!res.ok) throw new Error("Failed to fetch packages");
+
+        const packages = await res.json();
+        if (!packages.length) {
+          packagesContainer.innerHTML = "<p>No packages available at the moment.</p>";
+          return;
+        }
+
+        packagesContainer.innerHTML = packages.map(pkg => `
+          <div class="package-card">
+            ${pkg.image ? `<img src="https://mindandmedicineholidays.onrender.com${pkg.image}" alt="${pkg.title}">` : ""}
+            <h3>${pkg.title}</h3>
+            <p>${pkg.description}</p>
+            <p class="price">Price: $${pkg.price}</p>
+          </div>
+        `).join("");
+      } catch (err) {
+        console.error(err);
+        packagesContainer.innerHTML = `<p style="color:red;">Error loading packages: ${err.message}</p>`;
+      }
+    }
+
+    loadPackages();
+  </script>
+</body>
+</html>
+
