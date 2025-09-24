@@ -15,31 +15,32 @@ exports.getAllPackages = async (req, res) => {
 // ✅ Create a new package (admin only)
 exports.createPackage = async (req, res) => {
   try {
-    const { title, price } = req.body;
+    const { title, price, description } = req.body;
 
-    if (!title || !price) {
-      return res.status(400).json({ message: "Title and price are required" });
+    if (!title || !price || !description) {
+      return res.status(400).json({ message: "Title, price, and description are required" });
     }
 
-    if (!req.file) {
-      return res.status(400).json({ message: "Image upload failed or missing" });
-    }
+    const image = req.file ? `/uploads/packages/${req.file.filename}` : null;
 
-    const image = `/uploads/packages/${req.file.filename}`;
-
-    const newPackage = await Package.create({ title, price, image });
+    const newPackage = await Package.create({
+      title,
+      price,
+      description,
+      image,
+    });
 
     res.status(201).json(newPackage);
   } catch (error) {
     console.error("Error creating package:", error);
-    res.status(500).json({ message: error.message || "Failed to create package" });
+    res.status(500).json({ message: error.message || "Server error" });
   }
 };
 
 // ✅ Update a package (admin only)
 exports.updatePackage = async (req, res) => {
   try {
-    const { title, price } = req.body;
+    const { title, price, description } = req.body;
     const packageToUpdate = await Package.findByPk(req.params.id);
 
     if (!packageToUpdate) {
@@ -48,7 +49,13 @@ exports.updatePackage = async (req, res) => {
 
     const image = req.file ? `/uploads/packages/${req.file.filename}` : packageToUpdate.image;
 
-    await packageToUpdate.update({ title, price, image });
+    await packageToUpdate.update({
+      title: title || packageToUpdate.title,
+      price: price || packageToUpdate.price,
+      description: description || packageToUpdate.description,
+      image,
+    });
+
     res.json(packageToUpdate);
   } catch (error) {
     console.error("Error updating package:", error);
@@ -72,5 +79,6 @@ exports.deletePackage = async (req, res) => {
     res.status(500).json({ message: error.message || "Failed to delete package" });
   }
 };
+
 
 
