@@ -8,7 +8,7 @@ exports.getAllPackages = async (req, res) => {
     res.json(packages);
   } catch (error) {
     console.error("Error fetching packages:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error.message || "Failed to fetch packages" });
   }
 };
 
@@ -16,15 +16,23 @@ exports.getAllPackages = async (req, res) => {
 exports.createPackage = async (req, res) => {
   try {
     const { title, price } = req.body;
-    if (!title || !price) return res.status(400).json({ message: "Title and price are required" });
 
-    const image = req.file ? `/uploads/packages/${req.file.filename}` : null;
+    if (!title || !price) {
+      return res.status(400).json({ message: "Title and price are required" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Image upload failed or missing" });
+    }
+
+    const image = `/uploads/packages/${req.file.filename}`;
 
     const newPackage = await Package.create({ title, price, image });
+
     res.status(201).json(newPackage);
   } catch (error) {
     console.error("Error creating package:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error.message || "Failed to create package" });
   }
 };
 
@@ -34,7 +42,9 @@ exports.updatePackage = async (req, res) => {
     const { title, price } = req.body;
     const packageToUpdate = await Package.findByPk(req.params.id);
 
-    if (!packageToUpdate) return res.status(404).json({ message: "Package not found" });
+    if (!packageToUpdate) {
+      return res.status(404).json({ message: "Package not found" });
+    }
 
     const image = req.file ? `/uploads/packages/${req.file.filename}` : packageToUpdate.image;
 
@@ -42,7 +52,7 @@ exports.updatePackage = async (req, res) => {
     res.json(packageToUpdate);
   } catch (error) {
     console.error("Error updating package:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error.message || "Failed to update package" });
   }
 };
 
@@ -50,13 +60,17 @@ exports.updatePackage = async (req, res) => {
 exports.deletePackage = async (req, res) => {
   try {
     const packageToDelete = await Package.findByPk(req.params.id);
-    if (!packageToDelete) return res.status(404).json({ message: "Package not found" });
+
+    if (!packageToDelete) {
+      return res.status(404).json({ message: "Package not found" });
+    }
 
     await packageToDelete.destroy();
     res.json({ message: "Package deleted successfully" });
   } catch (error) {
     console.error("Error deleting package:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error.message || "Failed to delete package" });
   }
 };
+
 
