@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activities</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 20px; }
+    h1 { text-align: center; margin-bottom: 30px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px gray; }
+    .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 5px; }
+    .card h3 { margin: 10px 0 5px; }
+    .card p { margin: 5px 0; }
+    .location { font-style: italic; color: gray; }
+  </style>
+</head>
+<body>
+  <h1>Available Activities</h1>
+  <div id="activitiesGrid" class="grid"></div>
+
+  <script>
+    const API_BASE_URL = "https://mindandmedicineholidays.onrender.com";
+
+    async function fetchActivities() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/activities`);
+        const activities = await res.json();
+
+        const grid = document.getElementById("activitiesGrid");
+        grid.innerHTML = "";
+
+        activities.forEach(act => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img src="${API_BASE_URL}${act.image}" alt="${act.name}">
+            <h3>${act.name}</h3>
+            <p>${act.description}</p>
+            <p class="location">📍 ${act.location || "Location not specified"}</p>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error fetching activities:", err);
+      }
+    }
+
+    fetchActivities();
+  </script>
+</body>
+</html>

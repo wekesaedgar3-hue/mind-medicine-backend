@@ -14,8 +14,10 @@
     .section.active { display: block; }
     form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 5px gray; max-width: 500px; }
     input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    textarea { resize: vertical; }
     button { background: teal; color: white; border: none; cursor: pointer; }
     button:hover { background: darkcyan; }
+    #status { margin-top: 10px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -29,13 +31,15 @@
   <div class="content">
     <!-- Packages Upload -->
     <div id="packagesSection" class="section active">
-      <h2>Upload Package</h2>
+      <h2>Add New Package</h2>
       <form id="uploadPackageForm" enctype="multipart/form-data">
         <input type="text" name="title" placeholder="Package Title" required />
         <input type="number" name="price" placeholder="Price" required />
+        <textarea name="description" placeholder="Package Description" required></textarea>
         <input type="file" name="image" accept="image/*" required />
         <button type="submit">Upload Package</button>
       </form>
+      <p id="packageStatus"></p>
     </div>
 
     <!-- Activities Upload -->
@@ -48,6 +52,7 @@
         <input type="file" name="image" accept="image/*" required />
         <button type="submit">Upload Activity</button>
       </form>
+      <p id="activityStatus"></p>
     </div>
   </div>
 
@@ -70,18 +75,30 @@
     document.getElementById("uploadPackageForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const formData = new FormData(this);
-      const res = await fetch(`${API_BASE_URL}/api/packages`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
+      const statusEl = document.getElementById("packageStatus");
 
-      if (res.ok) {
-        alert("✅ Package uploaded successfully!");
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/packages`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Upload failed");
+
+        statusEl.textContent = "✅ Package uploaded successfully! Redirecting...";
+        statusEl.style.color = "green";
         this.reset();
-      } else {
-        const err = await res.text();
-        alert("❌ Package upload failed! " + err);
+
+        // ✅ Redirect to packages list page after 2 seconds
+        setTimeout(() => {
+          window.location.href = "packages.html"; 
+        }, 2000);
+
+      } catch (err) {
+        statusEl.textContent = "❌ " + err.message;
+        statusEl.style.color = "red";
       }
     });
 
@@ -89,18 +106,30 @@
     document.getElementById("uploadActivityForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const formData = new FormData(this);
-      const res = await fetch(`${API_BASE_URL}/api/activities`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
+      const statusEl = document.getElementById("activityStatus");
 
-      if (res.ok) {
-        alert("✅ Activity uploaded successfully!");
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/activities`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Upload failed");
+
+        statusEl.textContent = "✅ Activity uploaded successfully! Redirecting...";
+        statusEl.style.color = "green";
         this.reset();
-      } else {
-        const err = await res.text();
-        alert("❌ Activity upload failed! " + err);
+
+        // ✅ Redirect to activities list page after 2 seconds
+        setTimeout(() => {
+          window.location.href = "activities.html"; 
+        }, 2000);
+
+      } catch (err) {
+        statusEl.textContent = "❌ " + err.message;
+        statusEl.style.color = "red";
       }
     });
 
@@ -112,6 +141,7 @@
   </script>
 </body>
 </html>
+
 
 
 
