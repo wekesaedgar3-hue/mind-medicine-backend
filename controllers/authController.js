@@ -1,4 +1,3 @@
-// mind-medicine-backend/controllers/authController.js
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -56,6 +55,11 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
+    if (!process.env.JWT_SECRET) {
+      console.error("❌ JWT_SECRET is missing in environment");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
+
     // Create JWT
     const token = jwt.sign(
       { id: user.id, role: user.role },
@@ -71,7 +75,7 @@ exports.login = async (req, res) => {
         id: user.id,
         fullName: user.fullName,
         email: user.email,
-        role: user.role,  // 🔑 important for redirect
+        role: user.role,
         profilePic: user.profilePic
       }
     });
@@ -80,6 +84,7 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 

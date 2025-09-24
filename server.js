@@ -8,6 +8,11 @@ const sequelize = require("./config/db");
 // Load environment variables
 dotenv.config();
 
+if (!process.env.JWT_SECRET) {
+  console.error("❌ Missing JWT_SECRET environment variable!");
+  process.exit(1); // stop the server if JWT_SECRET is not set
+}
+
 const app = express();
 
 // Middleware
@@ -32,14 +37,14 @@ const authRoutes = require("./routes/authRoutes");
 const packageRoutes = require("./routes/packageRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
-const adminRoutes = require("./routes/adminRoutes"); // ✅ import admin routes
+const adminRoutes = require("./routes/adminRoutes");
 
 // Mount Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/packages", packageRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
-app.use("/api/admin", adminRoutes); // ✅ mount admin routes
+app.use("/api/admin", adminRoutes);
 
 // ✅ Fallback route for SPA (so React/Vanilla frontend routes work)
 app.use((req, res) => {
@@ -72,8 +77,6 @@ sequelize
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
-
-
 
 
 
