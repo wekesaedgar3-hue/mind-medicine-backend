@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; display: flex; }
+    nav { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
+    nav h3 { margin-top: 0; }
+    nav a { color: white; display: block; margin: 15px 0; text-decoration: none; cursor: pointer; }
+    .content { flex: 1; padding: 30px; background: #f4f4f4; min-height: 100vh; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .card { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 0 5px gray; }
+    img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
+    button, input, textarea { padding: 10px; margin-top: 10px; width: 100%; }
+    form { background: white; padding: 20px; border-radius: 8px; max-width: 400px; box-shadow: 0 0 10px gray; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <h3>Admin Dashboard</h3>
+    <a onclick="showSection('bookingsSection')">Bookings</a>
+    <a onclick="showSection('packagesSection')">Packages</a>
+    <a onclick="showSection('activitiesSection')">Activities</a>
+    <a onclick="showSection('uploadPackageSection')">Upload Package</a>
+    <a onclick="showSection('uploadActivitySection')">Upload Activity</a>
+    <a onclick="logout()">Logout</a>
+  </nav>
+
+  <div class="content">
+    <!-- Bookings -->
+    <div id="bookingsSection" class="section active">
+      <h2>User Bookings</h2>
+      <div id="bookingsList"></div>
+    </div>
+
+    <!-- Packages -->
+    <div id="packagesSection" class="section">
+      <h2>All Packages</h2>
+      <div id="packagesList"></div>
+    </div>
+
+    <!-- Activities -->
+    <div id="activitiesSection" class="section">
+      <h2>All Activities</h2>
+      <div id="activitiesList"></div>
+    </div>
+
+    <!-- Upload Package -->
+    <div id="uploadPackageSection" class="section">
+      <h2>Upload Package</h2>
+      <form id="uploadPackageForm" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Package Title" required>
+        <input type="text" name="price" placeholder="Price" required>
+        <input type="file" name="image" accept="image/*" required>
+        <button type="submit">Upload Package</button>
+      </form>
+    </div>
+
+    <!-- Upload Activity -->
+    <div id="uploadActivitySection" class="section">
+      <h2>Upload Activity</h2>
+      <form id="uploadActivityForm" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Activity Name" required>
+        <textarea name="description" placeholder="Activity Description" required></textarea>
+        <input type="text" name="location" placeholder="Location">
+        <input type="file" name="image" accept="image/*" required>
+        <button type="submit">Upload Activity</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "https://mindandmedicineholidays.onrender.com";
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "admin") {
+      alert("You must be logged in as an admin!");
+      window.location.href = "login.html";
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+
+      // Dynamic refresh
+      if(id === 'bookingsSection') loadBookings();
+      if(id === 'packagesSection') loadPackages();
+      if(id === 'activitiesSection') loadActivities();
+    }
+
+    // Load bookings
+    async function loadBookings() {
+      try {
+        const res = await fetch(`${API_BASE}/api/bookings`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const bookings = await res.json();
+        const container = document.getElementById("bookingsList");
+        container.innerHTML = bookings.length === 0 ? "<p>No bookings yet.</p>" : "";
+        bookings.forEach(b => {
+          const div = document.createElement("div");
+          div.classList.add("card");
+          div.innerHTML = `
+            <p><strong>User:</strong> ${b.userName || "N/A"}</p>
+            <p><strong>Package:</strong> ${b.packageTitle || "N/A"}</p>
+            <p><strong>Activity:</strong> ${b.activityName || "N/A"}</p>
+            <p><strong>Status:</strong> ${b.status}</p>
+            <p><strong>Receipt:</strong> ${b.receipt ? `<img src="${API_BASE}${b.receipt}" width="150">` : "N/A"}</p>
+          `;
+          container.appendChild(div);
+        });
+      } catch(err) {
+        alert("Failed to load bookings! " + err);
+      }
+    }
+
+    // Load packages
+    async function loadPackages() {
+      try {
+        const res = await fetch(`${API_BASE}/api/packages`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const packages = await res.json();
+        const container = document.getElementById("packagesList");
+        container.innerHTML = packages.length === 0 ? "<p>No packages yet.</p>" : "";
+        packages.forEach(p => {
+          const div = document.createElement("div");
+          div.classList.add("card");
+          div.innerHTML = `<h3>${p.title}</h3>
+                           <img src="${API_BASE}${p.image}" alt="${p.title}">
+                           <p>Price: $${p.price}</p>`;
+          container.appendChild(div);
+        });
+      } catch(err) {
+        alert("Failed to load packages! " + err);
+      }
+    }
+
+    // Load activities
+    async function loadActivities() {
+      try {
+        const res = await fetch(`${API_BASE}/api/activities`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const activities = await res.json();
+        const container = document.getElementById("activitiesList");
+        container.innerHTML = activities.length === 0 ? "<p>No activities yet.</p>" : "";
+        activities.forEach(a => {
+          const div = document.createElement("div");
+          div.classList.add("card");
+          div.innerHTML = `<h3>${a.name}</h3>
+                           <img src="${API_BASE}${a.image}" alt="${a.name}">
+                           <p>${a.description}</p>
+                           <p>Location: ${a.location || "N/A"}</p>`;
+          container.appendChild(div);
+        });
+      } catch(err) {
+        alert("Failed to load activities! " + err);
+      }
+    }
+
+    // Upload package
+    document.getElementById('uploadPackageForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch(`${API_BASE}/api/packages`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      if(res.ok){
+        alert("Package uploaded successfully!");
+        this.reset();
+        loadPackages(); // dynamically refresh package list
+      } else {
+        const err = await res.text();
+        alert("Package upload failed! " + err);
+      }
+    });
+
+    // Upload activity
+    document.getElementById('uploadActivityForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch(`${API_BASE}/api/activities`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      if(res.ok){
+        alert("Activity uploaded successfully!");
+        this.reset();
+        loadActivities(); // dynamically refresh activity list
+      } else {
+        const err = await res.text();
+        alert("Activity upload failed! " + err);
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+
+    // Initial load
+    loadBookings();
+    loadPackages();
+    loadActivities();
+  </script>
+</body>
+</html>
+
+
+
+

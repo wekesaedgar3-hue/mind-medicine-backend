@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking Cart</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 30px; }
+    form { background: white; padding: 20px; max-width: 500px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px gray; }
+    input, select, button { width: 100%; margin: 10px 0; padding: 10px; }
+    h2 { text-align: center; }
+  </style>
+</head>
+<body>
+  <form id="bookingForm">
+    <h2>Book Your Package</h2>
+    <label>Package Name</label>
+    <select id="packageSelect" required></select>
+    <label>Start Date</label>
+    <input type="date" id="startDate" required>
+    <label>End Date</label>
+    <input type="date" id="endDate" required>
+    <label>Choose Daily Activities</label>
+    <select id="activitiesSelect" multiple></select>
+    <button type="submit">Generate Schedule & Pay</button>
+  </form>
+
+  <script>
+    const API_BASE = "https://mind-medicine-backend.onrender.com";
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Login first!");
+      window.location.href = "login.html";
+    }
+
+    async function loadPackages() {
+      const res = await fetch(`${API_BASE}/api/packages`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        alert("Failed to load packages");
+        return;
+      }
+
+      const packages = await res.json();
+      const select = document.getElementById("packageSelect");
+      select.innerHTML = "";
+      packages.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = `${p.title} ($${p.price})`;
+        select.appendChild(opt);
+      });
+    }
+
+    async function loadActivities() {
+      const res = await fetch(`${API_BASE}/api/activities`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        alert("Failed to load activities");
+        return;
+      }
+
+      const activities = await res.json();
+      const select = document.getElementById("activitiesSelect");
+      select.innerHTML = "";
+      activities.forEach(a => {
+        const opt = document.createElement("option");
+        opt.value = a.id;
+        opt.textContent = a.name;
+        select.appendChild(opt);
+      });
+    }
+
+    document.getElementById("bookingForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const packageId = document.getElementById("packageSelect").value;
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+      const activityIds = Array.from(document.getElementById("activitiesSelect").selectedOptions).map(opt => opt.value);
+
+      const res = await fetch(`${API_BASE}/api/bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ packageId, startDate, endDate, activityId: activityIds })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("✅ Booking created successfully!");
+        this.reset();
+      } else {
+        alert("❌ Booking failed: " + (data.message || data.error));
+      }
+    });
+
+    // Initial load
+    loadPackages();
+    loadActivities();
+  </script>
+</body>
+</html>
+
+

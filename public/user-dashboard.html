@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      height: 100vh;
+      display: flex;
+      background: linear-gradient(to right, #1b4332, #81c784); /* balanced green theme */
+    }
+    nav {
+      width: 250px;
+      background: #2e7d32; /* deep green sidebar */
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.25);
+    }
+    nav h3 { margin-top: 0; text-align: center; font-size: 20px; }
+    nav a {
+      color: white;
+      display: block;
+      margin: 12px 0;
+      padding: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    nav a:hover { background: rgba(255, 255, 255, 0.15); }
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(6px);
+      min-height: 100vh;
+      color: #fff;
+      overflow-y: auto;
+    }
+    h2 { border-bottom: 2px solid rgba(255,255,255,0.25); padding-bottom: 8px; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(6px);
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.25);
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .card:hover { transform: scale(1.02); }
+    img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
+    button {
+      padding: 10px 15px;
+      margin-top: 10px;
+      cursor: pointer;
+      background: #43a047;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    button:hover { background: #2e7d32; }
+
+    /* Modal */
+    #packageModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.65);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #modalContent {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+    }
+    #closeModal {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    /* Categories */
+    .categories {
+      margin-bottom: 20px;
+    }
+    .categories a {
+      margin-right: 12px;
+      background: #43a047;
+      padding: 8px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      color: white;
+      transition: background 0.3s;
+      display: inline-block;
+    }
+    .categories a:hover {
+      background: #2e7d32;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h3>User Dashboard</h3>
+    <div class="nav-links">
+      <a onclick="showSection('packagesSection')">📦 Packages</a>
+      <a onclick="showSection('activitiesSection')">🎯 Activities</a>
+      <a id="adminAddPackageLink" onclick="showSection('addPackageSection')" style="display:none">➕ Add Package</a>
+      <a id="adminAddActivityLink" onclick="showSection('addActivitySection')" style="display:none">➕ Add Activity</a>
+      <a id="adminBookingsLink" onclick="showSection('bookingsSection')" style="display:none">📑 Bookings</a>
+      <a onclick="logout()">🚪 Logout</a>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div id="packagesSection" class="section active">
+      <h2>Available Packages</h2>
+      <div class="categories">
+        <a onclick="loadPackagesByCategory('Wellness Retreats')">Wellness Retreats</a>
+        <a onclick="loadPackagesByCategory('Medical Tourism')">Medical Tourism</a>
+        <a onclick="loadPackagesByCategory('Holistic Healing')">Holistic Healing</a>
+        <a onclick="loadPackagesByCategory('Adventure & Mindfulness')">Adventure & Mindfulness</a>
+        <a onclick="loadPackagesByCategory('Corporate Wellness')">Corporate Wellness</a>
+      </div>
+      <div id="packagesList"></div>
+    </div>
+
+    <div id="activitiesSection" class="section">
+      <h2>Available Activities</h2>
+      <div id="activitiesList"></div>
+    </div>
+
+    <div id="addPackageSection" class="section">
+      <h2>Add Package</h2>
+      <form id="addPackageForm" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Package Title" required><br><br>
+        <input type="number" name="price" placeholder="Price" required><br><br>
+        <textarea name="description" placeholder="Description" required></textarea><br><br>
+        <input type="text" name="category" placeholder="Category (e.g. Wellness Retreats)" required><br><br>
+        <input type="file" name="image" accept="image/*" required><br><br>
+        <button type="submit">Upload Package</button>
+      </form>
+    </div>
+
+    <div id="addActivitySection" class="section">
+      <h2>Add Activity</h2>
+      <form id="addActivityForm" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Activity Name" required><br><br>
+        <textarea name="description" placeholder="Activity Description" required></textarea><br><br>
+        <input type="file" name="image" accept="image/*" required><br><br>
+        <button type="submit">Upload Activity</button>
+      </form>
+    </div>
+
+    <div id="bookingsSection" class="section">
+      <h2>All Bookings</h2>
+      <div id="bookingsList"></div>
+    </div>
+  </div>
+
+  <div id="packageModal">
+    <div id="modalContent">
+      <span id="closeModal">&times;</span>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const backendUrl = "https://mindandmedicineholidays.onrender.com";
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if(!token){
+      alert("You must be logged in!");
+      window.location.href = "login.html";
+    }
+
+    if(role === "admin") {
+      document.getElementById("adminAddPackageLink").style.display = "block";
+      document.getElementById("adminAddActivityLink").style.display = "block";
+      document.getElementById("adminBookingsLink").style.display = "block";
+    }
+
+    function showSection(id){
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if(id === 'packagesSection') loadPackages();
+      if(id === 'activitiesSection') loadActivities();
+      if(id === 'bookingsSection') loadBookings();
+    }
+
+    async function loadPackages(category=null){
+      try {
+        let url = `${backendUrl}/api/packages`;
+        if(category) url += `?category=${encodeURIComponent(category)}`;
+        const res = await fetch(url);
+        const packages = await res.json();
+        const container = document.getElementById("packagesList");
+        container.innerHTML = "";
+        if (packages.length === 0) {
+          container.innerHTML = "<p>No packages available in this category.</p>";
+          return;
+        }
+        packages.forEach(p => {
+          const div = document.createElement("div");
+          div.classList.add("card");
+          div.innerHTML = `<h3>${p.title}</h3><img src="${backendUrl}${p.image}" alt="${p.title}"><p><strong>Price:</strong> $${p.price}</p><p>${p.description}</p><p><em>${p.category || ''}</em></p>`;
+          div.addEventListener("click", () => showPackageModal(p));
+          container.appendChild(div);
+        });
+      } catch(err) {
+        console.error(err);
+        document.getElementById("packagesList").innerHTML = "<p>Failed to load packages.</p>";
+      }
+    }
+
+    function loadPackagesByCategory(category){
+      showSection('packagesSection');
+      loadPackages(category);
+    }
+
+    async function loadActivities(){
+      try {
+        const res = await fetch(`${backendUrl}/api/activities`);
+        const activities = await res.json();
+        const container = document.getElementById("activitiesList");
+        container.innerHTML = "";
+        activities.forEach(a => {
+          const div = document.createElement("div");
+          div.classList.add("card");
+          div.innerHTML = `<h3>${a.name}</h3><img src="${backendUrl}${a.image}" alt="${a.name}"><p>${a.description}</p>`;
+          container.appendChild(div);
+        });
+      } catch(err) {
+        console.error(err);
+        document.getElementById("activitiesList").innerHTML = "<p>Failed to load activities.</p>";
+      }
+    }
+
+    async function loadBookings(){
+      try {
+        const res = await fetch(`${backendUrl}/api/bookings`, { headers: { Authorization: `Bearer ${token}` } });
+        const bookings = await res.json();
+        const container = document.getElementById("bookingsList");
+        container.innerHTML = "";
+        bookings.forEach(b => {
+          const div = document.createElement("div");
+          div.classList.add("card");
+          div.innerHTML = `<h3>Booking #${b.id}</h3><p><strong>User:</strong> ${b.userId}</p><p><strong>Package:</strong> ${b.packageId}</p>`;
+          container.appendChild(div);
+        });
+      } catch(err){
+        console.error(err);
+        document.getElementById("bookingsList").innerHTML = "<p>Failed to load bookings.</p>";
+      }
+    }
+
+    function showPackageModal(pkg){
+      const modal = document.getElementById("packageModal");
+      document.getElementById("modalBody").innerHTML = `
+        <h2>${pkg.title}</h2>
+        <img src="${backendUrl}${pkg.image}" alt="${pkg.title}" style="width:100%; border-radius:8px;">
+        <p><strong>Price:</strong> $${pkg.price}</p>
+        <p>${pkg.description}</p>
+        <p><em>${pkg.category || ''}</em></p>
+        <button onclick="bookPackage(${pkg.id})">Book Now</button>
+      `;
+      modal.style.display = "flex";
+    }
+
+    document.getElementById("closeModal").addEventListener("click", () => {
+      document.getElementById("packageModal").style.display = "none";
+    });
+
+    async function bookPackage(packageId){
+      try {
+        const res = await fetch(`${backendUrl}/api/bookings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ packageId })
+        });
+        if(!res.ok) throw new Error("Booking failed");
+        alert("✅ Package booked successfully!");
+        document.getElementById("packageModal").style.display = "none";
+        loadBookings();
+      } catch(err){
+        alert("❌ " + err.message);
+      }
+    }
+
+    document.getElementById("addPackageForm")?.addEventListener("submit", async function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      try {
+        const res = await fetch(`${backendUrl}/api/packages`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+        if(!res.ok) throw new Error("Failed to upload package");
+        alert("✅ Package uploaded!");
+        this.reset();
+        loadPackages();
+      } catch(err){ alert("❌ " + err.message); }
+    });
+
+    document.getElementById("addActivityForm")?.addEventListener("submit", async function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      try {
+        const res = await fetch(`${backendUrl}/api/activities`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+        if(!res.ok) throw new Error("Failed to upload activity");
+        alert("✅ Activity uploaded!");
+        this.reset();
+        loadActivities();
+      } catch(err){ alert("❌ " + err.message); }
+    });
+
+    function logout(){
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+
+    // Initial load
+    loadPackages();
+    loadActivities();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+

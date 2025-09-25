@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+    body { font-family: sans-serif; display: flex; margin: 0; }
+    nav { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
+    nav h3 { margin-top: 0; }
+    nav a { color: white; display: block; margin: 15px 0; text-decoration: none; cursor: pointer; }
+    .content { padding: 30px; flex: 1; background: #f4f4f4; min-height: 100vh; }
+    h2 { color: #2c3e50; }
+    form { background: white; padding: 20px; border-radius: 8px; max-width: 400px; box-shadow: 0 0 10px gray; }
+    input, button { width: 100%; padding: 10px; margin-top: 10px; }
+    #bookingsList { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px gray; }
+    .hidden { display: none; }
+    img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <h3>Admin Panel</h3>
+    <a onclick="showSection('addPackage')">Add Package</a>
+    <a onclick="showSection('uploadMedia')">Upload Activity</a>
+    <a onclick="showSection('viewBookings')">View Bookings</a>
+    <a onclick="logout()">Logout</a>
+  </nav>
+
+  <div class="content">
+    <!-- Add Package -->
+    <div id="addPackage" class="section">
+      <h2>Add New Holiday Package</h2>
+      <form id="packageForm" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Package Title" required>
+        <input type="text" name="price" placeholder="Price (e.g., 500)" required>
+        <input type="file" name="image" accept="image/*" required>
+        <button type="submit">Add Package</button>
+      </form>
+    </div>
+
+    <!-- Upload Activity -->
+    <div id="uploadMedia" class="section hidden">
+      <h2>Upload Activity</h2>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Activity Name" required>
+        <input type="text" name="description" placeholder="Activity Description" required>
+        <input type="text" name="location" placeholder="Location">
+        <input type="file" name="image" accept="image/*" required>
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+
+    <!-- View Bookings -->
+    <div id="viewBookings" class="section hidden">
+      <h2>Bookings</h2>
+      <div id="bookingsList"></div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Use your live backend URL
+    const API_BASE = "https://mindandmedicineholidays.onrender.com";
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "admin") {
+      alert("You must be logged in as an admin to access this page!");
+      window.location.href = "login.html";
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+      if (id === 'viewBookings') loadBookings();
+    }
+
+    async function loadBookings() {
+      const res = await fetch(`${API_BASE}/api/bookings`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        alert("Failed to load bookings!");
+        return;
+      }
+
+      const bookings = await res.json();
+      const container = document.getElementById("bookingsList");
+      container.innerHTML = "";
+
+      if (bookings.length === 0) {
+        container.innerHTML = "<p>No bookings yet.</p>";
+      } else {
+        bookings.forEach(b => {
+          const div = document.createElement("div");
+          div.classList.add("card");
+          div.innerHTML = `
+            <p>Package: ${b.packageId || "N/A"}</p>
+            <p>Activity: ${b.activityId || "N/A"}</p>
+            <p>Status: ${b.status}</p>
+            <p>Receipt: ${b.receipt ? `<img src="${API_BASE}${b.receipt}">` : "N/A"}</p>
+          `;
+          container.appendChild(div);
+        });
+      }
+    }
+
+    // Add Package
+    document.getElementById('packageForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch(`${API_BASE}/api/packages`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      if (res.ok) {
+        alert("✅ Package added successfully!");
+        this.reset();
+      } else {
+        const err = await res.text();
+        alert("❌ Package upload failed! " + err);
+      }
+    });
+
+    // Upload Activity
+    document.getElementById('uploadForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch(`${API_BASE}/api/activities`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      if (res.ok) {
+        alert("✅ Activity uploaded successfully!");
+        this.reset();
+      } else {
+        const err = await res.text();
+        alert("❌ Activity upload failed! " + err);
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
