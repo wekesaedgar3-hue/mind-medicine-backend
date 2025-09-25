@@ -343,7 +343,7 @@
         localStorage.setItem("role","user");
         alert("✅ User Login Successful"); 
         closeModal("userLoginModal");
-        window.location.href = "userDashboard.html";
+        window.location.href = "user-dashboard.html"; // ✅ Fixed redirect
       } else alert("❌ Invalid user credentials");
     }catch(err){ alert("❌ Network error: "+err.message);}
   });
@@ -365,7 +365,7 @@
         localStorage.setItem("role","admin");
         alert("✅ Admin Login Successful"); 
         closeModal("adminLoginModal");
-        window.location.href = "adminPanel.html";
+        window.location.href = "admin-dashboard.html"; // ✅ Fixed redirect
       } else alert("❌ Invalid admin credentials");
     }catch(err){ alert("❌ Network error: "+err.message);}
   });
@@ -373,6 +373,7 @@
 
 </body>
 </html>
+
 
 
 
