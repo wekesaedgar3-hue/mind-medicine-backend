@@ -112,9 +112,7 @@
     background: rgba(0,0,0,0.4);
     z-index: -1;
   }
-  #promo:hover::before {
-    transform: scale(1.1);
-  }
+  #promo:hover::before { transform: scale(1.1); }
 
   #promo div {
     background: rgba(0,0,0,0.5); 
@@ -122,16 +120,8 @@
     border-radius: 12px;
   }
 
-  #promo h2 { 
-    font-size: 2.5rem; 
-    margin-bottom: 10px; 
-    color: #ffffff;
-  }
-  #promo p { 
-    font-size: 1.3rem; 
-    margin-bottom: 20px; 
-    color: #ffffff; 
-  }
+  #promo h2 { font-size: 2.5rem; margin-bottom: 10px; color: #ffffff; }
+  #promo p { font-size: 1.3rem; margin-bottom: 20px; color: #ffffff; }
   #promo .btn { background: #006400; }
 
   /* Sections */
@@ -317,83 +307,84 @@
 </div>
 
 <script>
-  const API_BASE_URL = "https://mindandmedicineholidays.onrender.com";
+const API_BASE_URL = "https://mindandmedicineholidays.onrender.com";
 
-  const hamburger = document.getElementById("hamburger");
-  const navMenu = document.getElementById("navMenu");
+const hamburger = document.getElementById("hamburger");
+const navMenu = document.getElementById("navMenu");
+hamburger.addEventListener("click", () => navMenu.classList.toggle("active"));
+document.querySelectorAll(".nav-menu a").forEach(link => link.addEventListener("click", () => navMenu.classList.remove("active")));
 
-  hamburger.addEventListener("click", () => navMenu.classList.toggle("active"));
-  document.querySelectorAll(".nav-menu a").forEach(link => link.addEventListener("click", () => navMenu.classList.remove("active")));
+// Open/Close Modals
+document.getElementById("openRegisterBtn").onclick = () => openModal("registerModal");
+document.getElementById("openUserLoginBtn").onclick = () => openModal("userLoginModal");
+document.getElementById("openRegisterMenu").onclick = () => openModal("registerModal");
+document.getElementById("openUserLoginMenu").onclick = () => openModal("userLoginModal");
+document.getElementById("openAdminLoginMenu").onclick = () => openModal("adminLoginModal");
+function openModal(id){ document.getElementById(id).style.display = "flex"; }
+function closeModal(id){ document.getElementById(id).style.display = "none"; }
+window.onclick = (e) => { if(e.target.classList.contains("modal")) e.target.style.display = "none"; };
 
-  // Open Modals
-  document.getElementById("openRegisterBtn").onclick = () => openModal("registerModal");
-  document.getElementById("openUserLoginBtn").onclick = () => openModal("userLoginModal");
+// Register Form
+document.getElementById("registerForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const [fullName,email,password,role] = [e.target[0].value,e.target[1].value,e.target[2].value,e.target[3].value];
+  try{
+    const res = await fetch(`${API_BASE_URL}/api/auth/register`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({fullName,email,password,role})
+    });
+    const data = await res.json();
+    if(res.ok){ alert("✅ Registration successful!"); closeModal("registerModal"); }
+    else alert("❌ "+(data.error||"Something went wrong."));
+  }catch(err){ alert("❌ Network error: "+err.message); }
+});
 
-  document.getElementById("openRegisterMenu").onclick = () => openModal("registerModal");
-  document.getElementById("openUserLoginMenu").onclick = () => openModal("userLoginModal");
-  document.getElementById("openAdminLoginMenu").onclick = () => openModal("adminLoginModal");
+// User Login
+document.getElementById("userLoginForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const email = e.target[0].value.trim();
+  const password = e.target[1].value.trim();
+  try{
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({email,password})
+    });
+    const data = await res.json();
+    if(res.ok && data.user && data.user.role==="user"){
+      localStorage.setItem("token",data.token);
+      closeModal("userLoginModal");
+      alert("✅ User Login Successful");
+      window.location.href="/dashboard.html";
+    } else if(res.ok && data.user && data.user.role==="admin"){
+      alert("❌ This is an admin account! Use Admin Login.");
+    } else alert("❌ Invalid user credentials");
+  }catch(err){ alert("❌ Network error: "+err.message); }
+});
 
-  function openModal(id){ document.getElementById(id).style.display = "flex"; }
-  function closeModal(id){ document.getElementById(id).style.display = "none"; }
-  window.onclick = (e) => { if(e.target.classList.contains("modal")) e.target.style.display = "none"; };
-
-  // Register Form
-  document.getElementById("registerForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const [fullName,email,password,role] = [e.target[0].value,e.target[1].value,e.target[2].value,e.target[3].value];
-    try{
-      const res = await fetch(`${API_BASE_URL}/api/auth/register`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({fullName,email,password,role})
-      });
-      const data = await res.json();
-      if(res.ok){ alert("✅ Registration successful!"); closeModal("registerModal"); }
-      else alert("❌ "+(data.error||"Something went wrong."));
-    }catch(err){ alert("❌ Network error: "+err.message); }
-  });
-
-  // User Login
-  document.getElementById("userLoginForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const email = e.target[0].value.trim();
-    const password = e.target[1].value.trim();
-    try{
-      const res = await fetch(`${API_BASE_URL}/api/auth/login`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({email,password})
-      });
-      const data = await res.json();
-      if(res.ok && data.user.role==="user"){ 
-        localStorage.setItem("token",data.token);
-        closeModal("userLoginModal");
-        alert("✅ User Login Successful"); 
-        window.location.href = "/dashboard.html"; // <-- redirect to user dashboard
-      } else alert("❌ Invalid user credentials");
-    }catch(err){ alert("❌ Network error: "+err.message);}
-  });
-
-  // Admin Login
-  document.getElementById("adminLoginForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const email = e.target[0].value.trim();
-    const password = e.target[1].value.trim();
-    try{
-      const res = await fetch(`${API_BASE_URL}/api/auth/login`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({email,password})
-      });
-      const data = await res.json();
-      if(res.ok && data.user.role==="admin"){ 
-        localStorage.setItem("token",data.token);
-        closeModal("adminLoginModal");
-        alert("✅ Admin Login Successful"); 
-        window.location.href = "/admin.html"; // <-- redirect to admin panel
-      } else alert("❌ Invalid admin credentials");
-    }catch(err){ alert("❌ Network error: "+err.message);}
-  });
+// Admin Login
+document.getElementById("adminLoginForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const email = e.target[0].value.trim();
+  const password = e.target[1].value.trim();
+  try{
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({email,password})
+    });
+    const data = await res.json();
+    if(res.ok && data.user && data.user.role==="admin"){
+      localStorage.setItem("token",data.token);
+      closeModal("adminLoginModal");
+      alert("✅ Admin Login Successful");
+      window.location.href="/admin.html";
+    } else if(res.ok && data.user && data.user.role==="user"){
+      alert("❌ This is a user account! Use User Login.");
+    } else alert("❌ Invalid admin credentials");
+  }catch(err){ alert("❌ Network error: "+err.message); }
+});
 </script>
 </body>
 </html>
