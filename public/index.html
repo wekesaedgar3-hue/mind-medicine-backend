@@ -87,7 +87,7 @@
   /* Promotional Section Full Width */
   #promo {
     width: 100vw;
-    height: 100vh; /* full viewport height */
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -112,26 +112,11 @@
     background: rgba(0,0,0,0.4);
     z-index: -1;
   }
-  #promo:hover::before {
-    transform: scale(1.1); /* zoom effect */
-  }
+  #promo:hover::before { transform: scale(1.1); }
 
-  #promo div {
-    background: rgba(0,0,0,0.5); 
-    padding: 20px; 
-    border-radius: 12px;
-  }
-
-  #promo h2 { 
-    font-size: 2.5rem; 
-    margin-bottom: 10px; 
-    color: #ffffff; /* explicitly white */
-  }
-  #promo p { 
-    font-size: 1.3rem; 
-    margin-bottom: 20px; 
-    color: #ffffff; 
-  }
+  #promo div { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; }
+  #promo h2 { font-size: 2.5rem; margin-bottom: 10px; color: #ffffff; }
+  #promo p { font-size: 1.3rem; margin-bottom: 20px; color: #ffffff; }
   #promo .btn { background: #006400; }
 
   /* Sections */
@@ -178,16 +163,8 @@
     text-align: center;
     position: relative;
   }
-  .close-btn {
-    position: absolute;
-    top: 10px; right: 15px;
-    font-size: 1.5rem; cursor: pointer; color: #333;
-  }
-  input, select {
-    width: 100%; padding: 10px;
-    border: 1px solid #ccc; border-radius: 8px;
-    margin-bottom: 10px;
-  }
+  .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #333; }
+  input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; }
   button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #388e3c; color: white; font-weight: bold; cursor: pointer; }
   button:hover { background: #4caf50; }
 
@@ -218,7 +195,6 @@
   </nav>
 </header>
 
-<!-- Promotional Section -->
 <section id="promo">
   <div>
     <h2>Explore Wellness & Healing Holidays Worldwide</h2>
@@ -227,7 +203,6 @@
   </div>
 </section>
 
-<!-- Sections -->
 <section id="about-us">
   <h2>ABOUT US</h2>
   <div class="card">
@@ -368,7 +343,7 @@
         localStorage.setItem("token",data.token);
         alert("✅ User Login Successful"); 
         closeModal("userLoginModal");
-        window.location.href = "/userDashboard.html"; // redirect after login
+        window.location.href = "userDashboard.html"; // redirect
       }else alert("❌ Invalid user credentials");
     }catch(err){ alert("❌ Network error: "+err.message);}
   });
@@ -389,12 +364,14 @@
         localStorage.setItem("token",data.token);
         alert("✅ Admin Login Successful"); 
         closeModal("adminLoginModal");
-        window.location.href = "/adminPanel.html"; // redirect after login
+        window.location.href = "adminPanel.html"; // redirect
       }else alert("❌ Invalid admin credentials");
     }catch(err){ alert("❌ Network error: "+err.message);}
   });
 </script>
+
 </body>
 </html>
+
 
 
