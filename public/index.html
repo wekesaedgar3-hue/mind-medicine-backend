@@ -87,7 +87,7 @@
   /* Promotional Section Full Width */
   #promo {
     width: 100vw;
-    height: 100vh; /* full viewport height */
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -113,7 +113,7 @@
     z-index: -1;
   }
   #promo:hover::before {
-    transform: scale(1.1); /* zoom effect */
+    transform: scale(1.1);
   }
 
   #promo div {
@@ -125,7 +125,7 @@
   #promo h2 { 
     font-size: 2.5rem; 
     margin-bottom: 10px; 
-    color: #ffffff; /* explicitly white */
+    color: #ffffff;
   }
   #promo p { 
     font-size: 1.3rem; 
@@ -157,7 +157,7 @@
   footer a { color: #90ee90; text-decoration: none; margin: 0 10px; }
   footer a:hover { text-decoration: underline; }
 
-  /* ===== Modals ===== */
+  /* Modals */
   .modal {
     display: none;
     position: fixed;
@@ -367,9 +367,10 @@
       const data = await res.json();
       if(res.ok && data.user.role==="user"){ 
         localStorage.setItem("token",data.token);
-        alert("✅ User Login Successful"); 
         closeModal("userLoginModal");
-      }else alert("❌ Invalid user credentials");
+        alert("✅ User Login Successful"); 
+        window.location.href = "/dashboard.html"; // <-- redirect to user dashboard
+      } else alert("❌ Invalid user credentials");
     }catch(err){ alert("❌ Network error: "+err.message);}
   });
 
@@ -387,9 +388,10 @@
       const data = await res.json();
       if(res.ok && data.user.role==="admin"){ 
         localStorage.setItem("token",data.token);
-        alert("✅ Admin Login Successful"); 
         closeModal("adminLoginModal");
-      }else alert("❌ Invalid admin credentials");
+        alert("✅ Admin Login Successful"); 
+        window.location.href = "/admin.html"; // <-- redirect to admin panel
+      } else alert("❌ Invalid admin credentials");
     }catch(err){ alert("❌ Network error: "+err.message);}
   });
 </script>
