@@ -1,22 +1,21 @@
-// controllers/bookingController.js
 const Booking = require("../models/Booking");
 const User = require("../models/User");
 const Package = require("../models/Package");
 
-const getBaseUrl = (req) => `${req.protocol}://${req.get("host")}`;
+const getBaseUrl = (req) => {
+  return `${req.protocol}://${req.get("host")}`;
+};
 
 // ✅ Create booking
 exports.createBooking = async (req, res) => {
   try {
-    const { userId, packageId, startDate, endDate, activities, status } = req.body;
+    const { userId, packageId, activities, status } = req.body;
 
     const receipt = req.file ? `/uploads/bookings/${req.file.filename}` : null;
 
     const booking = await Booking.create({
       userId,
       packageId,
-      startDate,
-      endDate,
       activities: activities ? JSON.stringify(activities) : null,
       status,
       receipt,
@@ -26,7 +25,6 @@ exports.createBooking = async (req, res) => {
       message: "Booking created",
       booking: {
         ...booking.toJSON(),
-        activities: booking.activities ? JSON.parse(booking.activities) : null,
         receipt: receipt ? `${getBaseUrl(req)}${receipt}` : null,
       },
     });
@@ -35,37 +33,38 @@ exports.createBooking = async (req, res) => {
   }
 };
 
-// ✅ Get all bookings with user + package
+// ✅ Get all bookings (with User + Package info)
 exports.getBookings = async (req, res) => {
   try {
     const bookings = await Booking.findAll({
       include: [
-        { model: User, attributes: ["name", "email"] },
-        { model: Package, attributes: ["title", "price"] }
+        { model: User, attributes: ["id", "name", "email"] },
+        { model: Package, attributes: ["id", "title", "price"] },
       ],
     });
 
     const baseUrl = getBaseUrl(req);
 
-    const formattedBookings = bookings.map((b) => {
-      let parsedActivities = [];
-      try {
-        parsedActivities = b.activities ? JSON.parse(b.activities) : [];
-      } catch (err) {
-        parsedActivities = [];
+    const formatted = bookings.map((b) => {
+      let activities = [];
+      if (b.activities) {
+        try {
+          activities = JSON.parse(b.activities);
+        } catch (err) {
+          activities = [];
+        }
       }
-
       return {
         id: b.id,
+        user: b.User ? { id: b.User.id, name: b.User.name, email: b.User.email } : null,
+        package: b.Package ? { id: b.Package.id, title: b.Package.title, price: b.Package.price } : null,
+        activities,
         status: b.status,
         receipt: b.receipt ? `${baseUrl}${b.receipt}` : null,
-        user: b.User ? { name: b.User.name, email: b.User.email } : null,
-        package: b.Package ? { title: b.Package.title, price: b.Package.price } : null,
-        activities: parsedActivities,
       };
     });
 
-    res.json(formattedBookings);
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -76,8 +75,8 @@ exports.getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findByPk(req.params.id, {
       include: [
-        { model: User, attributes: ["name", "email"] },
-        { model: Package, attributes: ["title", "price"] }
+        { model: User, attributes: ["id", "name", "email"] },
+        { model: Package, attributes: ["id", "title", "price"] },
       ],
     });
 
@@ -86,20 +85,22 @@ exports.getBookingById = async (req, res) => {
     }
 
     const baseUrl = getBaseUrl(req);
-    let parsedActivities = [];
-    try {
-      parsedActivities = booking.activities ? JSON.parse(booking.activities) : [];
-    } catch (err) {
-      parsedActivities = [];
+    let activities = [];
+    if (booking.activities) {
+      try {
+        activities = JSON.parse(booking.activities);
+      } catch (err) {
+        activities = [];
+      }
     }
 
     res.json({
       id: booking.id,
+      user: booking.User ? { id: booking.User.id, name: booking.User.name, email: booking.User.email } : null,
+      package: booking.Package ? { id: booking.Package.id, title: booking.Package.title, price: booking.Package.price } : null,
+      activities,
       status: booking.status,
       receipt: booking.receipt ? `${baseUrl}${booking.receipt}` : null,
-      user: booking.User ? { name: booking.User.name, email: booking.User.email } : null,
-      package: booking.Package ? { title: booking.Package.title, price: booking.Package.price } : null,
-      activities: parsedActivities,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -146,10 +147,4 @@ exports.uploadReceipt = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
-
-
-
 
