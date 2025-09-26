@@ -1,9 +1,9 @@
 // controllers/bookingController.js
 const Booking = require("../models/Booking");
+const User = require("../models/User");
+const Package = require("../models/Package");
 
-const getBaseUrl = (req) => {
-  return `${req.protocol}://${req.get("host")}`;
-};
+const getBaseUrl = (req) => `${req.protocol}://${req.get("host")}`;
 
 // ✅ Create booking
 exports.createBooking = async (req, res) => {
@@ -35,17 +35,35 @@ exports.createBooking = async (req, res) => {
   }
 };
 
-// ✅ Get all bookings
+// ✅ Get all bookings with user + package + parsed activities
 exports.getBookings = async (req, res) => {
   try {
-    const bookings = await Booking.findAll();
+    const bookings = await Booking.findAll({
+      include: [
+        { model: User, attributes: ["name", "email"] },
+        { model: Package, attributes: ["title", "price"] }
+      ],
+    });
 
     const baseUrl = getBaseUrl(req);
-    const formattedBookings = bookings.map((b) => ({
-      ...b.toJSON(),
-      activities: b.activities ? JSON.parse(b.activities) : null,
-      receipt: b.receipt ? `${baseUrl}${b.receipt}` : null,
-    }));
+
+    const formattedBookings = bookings.map((b) => {
+      let parsedActivities = [];
+      try {
+        parsedActivities = b.activities ? JSON.parse(b.activities) : [];
+      } catch (err) {
+        parsedActivities = [];
+      }
+
+      return {
+        id: b.id,
+        status: b.status,
+        receipt: b.receipt ? `${baseUrl}${b.receipt}` : null,
+        user: b.User ? { name: b.User.name, email: b.User.email } : null,
+        package: b.Package ? { title: b.Package.title, price: b.Package.price } : null,
+        activities: parsedActivities
+      };
+    });
 
     res.json(formattedBookings);
   } catch (err) {
@@ -56,17 +74,33 @@ exports.getBookings = async (req, res) => {
 // ✅ Get booking by ID
 exports.getBookingById = async (req, res) => {
   try {
-    const booking = await Booking.findByPk(req.params.id);
+    const booking = await Booking.findByPk(req.params.id, {
+      include: [
+        { model: User, attributes: ["name", "email"] },
+        { model: Package, attributes: ["title", "price"] }
+      ],
+    });
 
     if (!booking) {
       return res.status(404).json({ error: "Booking not found" });
     }
 
     const baseUrl = getBaseUrl(req);
+
+    let parsedActivities = [];
+    try {
+      parsedActivities = booking.activities ? JSON.parse(booking.activities) : [];
+    } catch (err) {
+      parsedActivities = [];
+    }
+
     res.json({
-      ...booking.toJSON(),
-      activities: booking.activities ? JSON.parse(booking.activities) : null,
+      id: booking.id,
+      status: booking.status,
       receipt: booking.receipt ? `${baseUrl}${booking.receipt}` : null,
+      user: booking.User ? { name: booking.User.name, email: booking.User.email } : null,
+      package: booking.Package ? { title: booking.Package.title, price: booking.Package.price } : null,
+      activities: parsedActivities
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -113,6 +147,7 @@ exports.uploadReceipt = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 
 

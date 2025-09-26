@@ -125,7 +125,7 @@
       }
     });
 
-    // Load Bookings with User + Package + Activity info
+    // Load Bookings with User + Package + Activities info
     async function loadBookings(){
       try {
         const res = await fetch(`${API_BASE_URL}/api/bookings`, { 
@@ -138,9 +138,9 @@
           const div = document.createElement("div");
           div.classList.add("card");
           div.innerHTML = `
-            <p><strong>User:</strong> ${b.User ? b.User.name + " (" + b.User.email + ")" : "N/A"}</p>
-            <p><strong>Package:</strong> ${b.Package ? b.Package.title + " - $" + b.Package.price : "N/A"}</p>
-            <p><strong>Activity:</strong> ${b.Activity ? b.Activity.name : "N/A"}</p>
+            <p><strong>User:</strong> ${b.user ? b.user.name + " (" + b.user.email + ")" : "N/A"}</p>
+            <p><strong>Package:</strong> ${b.package ? b.package.title + " - $" + b.package.price : "N/A"}</p>
+            <p><strong>Activities:</strong> ${b.activities && b.activities.length > 0 ? b.activities.join(", ") : "N/A"}</p>
             <p><strong>Status:</strong> ${b.status}</p>
           `;
           container.appendChild(div);
@@ -158,4 +158,5 @@
   </script>
 </body>
 </html>
+
 
