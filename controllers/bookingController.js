@@ -1,3 +1,4 @@
+// controllers/bookingController.js
 const Booking = require("../models/Booking");
 
 const getBaseUrl = (req) => {
@@ -7,14 +8,16 @@ const getBaseUrl = (req) => {
 // ✅ Create booking
 exports.createBooking = async (req, res) => {
   try {
-    const { userId, packageId, activityId, status } = req.body;
+    const { userId, packageId, startDate, endDate, activities, status } = req.body;
 
     const receipt = req.file ? `/uploads/bookings/${req.file.filename}` : null;
 
     const booking = await Booking.create({
       userId,
       packageId,
-      activityId,
+      startDate,
+      endDate,
+      activities: activities ? JSON.stringify(activities) : null, // store as JSON string
       status,
       receipt,
     });
@@ -23,6 +26,7 @@ exports.createBooking = async (req, res) => {
       message: "Booking created",
       booking: {
         ...booking.toJSON(),
+        activities: booking.activities ? JSON.parse(booking.activities) : null,
         receipt: receipt ? `${getBaseUrl(req)}${receipt}` : null,
       },
     });
@@ -39,6 +43,7 @@ exports.getBookings = async (req, res) => {
     const baseUrl = getBaseUrl(req);
     const formattedBookings = bookings.map((b) => ({
       ...b.toJSON(),
+      activities: b.activities ? JSON.parse(b.activities) : null,
       receipt: b.receipt ? `${baseUrl}${b.receipt}` : null,
     }));
 
@@ -60,6 +65,7 @@ exports.getBookingById = async (req, res) => {
     const baseUrl = getBaseUrl(req);
     res.json({
       ...booking.toJSON(),
+      activities: booking.activities ? JSON.parse(booking.activities) : null,
       receipt: booking.receipt ? `${baseUrl}${booking.receipt}` : null,
     });
   } catch (err) {
@@ -107,6 +113,8 @@ exports.uploadReceipt = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
 
 
 
