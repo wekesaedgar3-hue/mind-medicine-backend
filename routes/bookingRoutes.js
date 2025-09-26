@@ -1,39 +1,14 @@
 // routes/bookingRoutes.js
 const express = require("express");
-const bookingController = require("../controllers/bookingController");
-const uploadBookings = require("../middleware/uploadBookings");
-
 const router = express.Router();
+const bookingController = require("../controllers/bookingController");
 
-// ✅ Create booking (with optional receipt upload)
-router.post(
-  "/",
-  uploadBookings.single("receipt"),
-  bookingController.createBooking
-);
-
-// ✅ Get all bookings
+// Routes
 router.get("/", bookingController.getBookings);
-
-// ✅ Get booking by ID
 router.get("/:id", bookingController.getBookingById);
-
-// ✅ Delete booking
+router.post("/", bookingController.createBooking);
 router.delete("/:id", bookingController.deleteBooking);
 
-// ✅ Upload only booking receipt
-router.post(
-  "/upload-receipt",
-  uploadBookings.single("receipt"),
-  bookingController.uploadReceipt
-);
-
 module.exports = router;
-
-
-
-
-
-
 
 

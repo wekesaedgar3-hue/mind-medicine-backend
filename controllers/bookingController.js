@@ -17,7 +17,7 @@ exports.createBooking = async (req, res) => {
       packageId,
       startDate,
       endDate,
-      activities: activities ? JSON.stringify(activities) : null, // store as JSON string
+      activities: activities ? JSON.stringify(activities) : null,
       status,
       receipt,
     });
@@ -35,7 +35,7 @@ exports.createBooking = async (req, res) => {
   }
 };
 
-// ✅ Get all bookings with user + package + parsed activities
+// ✅ Get all bookings with user + package
 exports.getBookings = async (req, res) => {
   try {
     const bookings = await Booking.findAll({
@@ -61,7 +61,7 @@ exports.getBookings = async (req, res) => {
         receipt: b.receipt ? `${baseUrl}${b.receipt}` : null,
         user: b.User ? { name: b.User.name, email: b.User.email } : null,
         package: b.Package ? { title: b.Package.title, price: b.Package.price } : null,
-        activities: parsedActivities
+        activities: parsedActivities,
       };
     });
 
@@ -86,7 +86,6 @@ exports.getBookingById = async (req, res) => {
     }
 
     const baseUrl = getBaseUrl(req);
-
     let parsedActivities = [];
     try {
       parsedActivities = booking.activities ? JSON.parse(booking.activities) : [];
@@ -100,7 +99,7 @@ exports.getBookingById = async (req, res) => {
       receipt: booking.receipt ? `${baseUrl}${booking.receipt}` : null,
       user: booking.User ? { name: booking.User.name, email: booking.User.email } : null,
       package: booking.Package ? { title: booking.Package.title, price: booking.Package.price } : null,
-      activities: parsedActivities
+      activities: parsedActivities,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -147,6 +146,7 @@ exports.uploadReceipt = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 
 
