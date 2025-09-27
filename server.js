@@ -15,8 +15,14 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ✅ Middleware
+app.use(
+  cors({
+    origin: "*", // or replace "*" with your frontend domain for more security
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 // ✅ Ensure upload folders exist
