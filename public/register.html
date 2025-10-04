@@ -5,127 +5,28 @@
   <title>Register - Mind & Medicine Holidays</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin:0; padding:0; }
     body {
       font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #4caf50, #81c784); /* jungle green gradient */
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #333;
-      position: relative;
-      overflow: hidden;
+      background: linear-gradient(135deg, #4caf50, #81c784);
+      height:100vh; display:flex; justify-content:center; align-items:center; color:#333; position:relative; overflow:hidden;
     }
-
     body::before, body::after {
-      content: "";
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.15;
-      z-index: -1;
+      content: ""; position:absolute; border-radius:50%; opacity:0.15; z-index:-1;
     }
-
-    body::before {
-      width: 250px;
-      height: 250px;
-      background: #ffeb3b;
-      top: 50px;
-      left: 30px;
-    }
-
-    body::after {
-      width: 300px;
-      height: 300px;
-      background: #ff4081;
-      bottom: 50px;
-      right: 50px;
-    }
-
-    form {
-      background: #ffffffcc;
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-      width: 350px;
-      text-align: center;
-      transition: transform 0.3s ease;
-    }
-
-    form:hover {
-      transform: translateY(-5px);
-    }
-
-    h2 {
-      margin-bottom: 30px;
-      color: #388e3c;
-      font-size: 28px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-
-    input:focus, select:focus {
-      border-color: #388e3c;
-      box-shadow: 0 0 8px rgba(56,142,60,0.3);
-      outline: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 15px;
-      background: #388e3c;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    button:hover {
-      background: #4caf50;
-      transform: scale(1.03);
-    }
-
-    p {
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    a {
-      text-decoration: none;
-      color: #388e3c;
-      font-weight: bold;
-      transition: color 0.3s;
-    }
-
-    a:hover {
-      color: #4caf50;
-    }
-
-    @media(max-width: 400px) {
-      form {
-        width: 90%;
-        padding: 30px;
-      }
-    }
+    body::before { width:250px; height:250px; background:#ffeb3b; top:50px; left:30px; }
+    body::after { width:300px; height:300px; background:#ff4081; bottom:50px; right:50px; }
+    form { background:#ffffffcc; padding:40px; border-radius:15px; box-shadow:0 15px 30px rgba(0,0,0,0.2); width:350px; text-align:center; transition: transform 0.3s ease; }
+    form:hover { transform: translateY(-5px); }
+    h2 { margin-bottom:30px; color:#388e3c; font-size:28px; text-shadow:1px 1px 2px rgba(0,0,0,0.2); }
+    input, select { width:100%; padding:12px 15px; margin:10px 0; border-radius:8px; border:1px solid #ccc; font-size:16px; }
+    input:focus, select:focus { border-color:#388e3c; box-shadow:0 0 8px rgba(56,142,60,0.3); outline:none; }
+    button { width:100%; padding:12px; margin-top:15px; background:#388e3c; border:none; border-radius:8px; color:white; font-size:18px; font-weight:bold; cursor:pointer; transition:background 0.3s, transform 0.2s; }
+    button:hover { background:#4caf50; transform: scale(1.03); }
+    p { margin-top:15px; font-size:14px; }
+    a { text-decoration:none; color:#388e3c; font-weight:bold; transition: color 0.3s; }
+    a:hover { color:#4caf50; }
+    @media(max-width:400px) { form { width:90%; padding:30px; } }
   </style>
 </head>
 <body>
@@ -153,7 +54,6 @@
       const role = document.querySelector("select[name='role']").value;
 
       try {
-        // ✅ Use relative URL so it works on localhost and Render
         const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -163,9 +63,13 @@
         const data = await res.json();
         if(res.ok){
           alert("✅ Registration successful! Please log in.");
-          window.location.href = "login.html";
+          if(role === "admin"){
+            window.location.href = "admin-login.html";
+          } else {
+            window.location.href = "login.html";
+          }
         } else {
-          alert("❌ " + (data.error || "Something went wrong."));
+          alert("❌ " + (data.message || "Something went wrong."));
         }
       } catch(err) {
         alert("❌ Network error: " + err.message);

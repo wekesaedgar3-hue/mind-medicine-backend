@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>User Login</title>
+<title>Login - Mind & Medicine Holidays</title>
 <style>
   body { font-family: Arial; background: linear-gradient(135deg,#4caf50,#81c784); height: 100vh; display:flex; justify-content:center; align-items:center; margin:0; }
   .login-container { background:#fff; padding:30px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.2); width:320px; text-align:center; }
@@ -15,7 +15,7 @@
 </head>
 <body>
 <div class="login-container">
-  <h2>User Login</h2>
+  <h2>Login</h2>
   <form id="loginForm">
     <input type="email" id="email" placeholder="Email" required>
     <input type="password" id="password" placeholder="Password" required>
@@ -52,7 +52,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       if(data.user.role === "admin") {
         window.location.href = "admin-dashboard.html";
       } else {
-        window.location.href = "user-dashboard.html";
+        window.location.href = "dashboard.html";
       }
     } else {
       errorMsg.textContent = data.message || "Login failed!";
@@ -65,6 +65,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 </script>
 </body>
 </html>
+
 
 
 

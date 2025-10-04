@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
+  <title>User Dashboard</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; display: flex; }
-    nav { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
+    nav { width: 220px; background: #27ae60; color: white; min-height: 100vh; padding: 20px; }
     nav h3 { margin-top: 0; }
     nav a { color: white; display: block; margin: 15px 0; text-decoration: none; cursor: pointer; }
+    nav a:hover { text-decoration: underline; }
     .content { flex: 1; padding: 30px; background: #f4f4f4; min-height: 100vh; }
     .section { display: none; }
     .section.active { display: block; }
@@ -20,55 +21,30 @@
 <body>
 
   <nav>
-    <h3>Admin Dashboard</h3>
-    <a onclick="showSection('bookingsSection')">Bookings</a>
-    <a onclick="showSection('packagesSection')">Packages</a>
-    <a onclick="showSection('activitiesSection')">Activities</a>
-    <a onclick="showSection('uploadPackageSection')">Upload Package</a>
-    <a onclick="showSection('uploadActivitySection')">Upload Activity</a>
+    <h3>User Dashboard</h3>
+    <a onclick="showSection('myBookingsSection')">My Bookings</a>
+    <a onclick="showSection('availablePackagesSection')">Available Packages</a>
+    <a onclick="showSection('availableActivitiesSection')">Available Activities</a>
     <a onclick="logout()">Logout</a>
   </nav>
 
   <div class="content">
-    <!-- Bookings -->
-    <div id="bookingsSection" class="section active">
-      <h2>User Bookings</h2>
-      <div id="bookingsList"></div>
+    <!-- User Bookings -->
+    <div id="myBookingsSection" class="section active">
+      <h2>My Bookings</h2>
+      <div id="myBookingsList"></div>
     </div>
 
-    <!-- Packages -->
-    <div id="packagesSection" class="section">
-      <h2>All Packages</h2>
-      <div id="packagesList"></div>
+    <!-- Available Packages -->
+    <div id="availablePackagesSection" class="section">
+      <h2>Available Packages</h2>
+      <div id="availablePackagesList"></div>
     </div>
 
-    <!-- Activities -->
-    <div id="activitiesSection" class="section">
-      <h2>All Activities</h2>
-      <div id="activitiesList"></div>
-    </div>
-
-    <!-- Upload Package -->
-    <div id="uploadPackageSection" class="section">
-      <h2>Upload Package</h2>
-      <form id="uploadPackageForm" enctype="multipart/form-data">
-        <input type="text" name="title" placeholder="Package Title" required>
-        <input type="text" name="price" placeholder="Price" required>
-        <input type="file" name="image" accept="image/*" required>
-        <button type="submit">Upload Package</button>
-      </form>
-    </div>
-
-    <!-- Upload Activity -->
-    <div id="uploadActivitySection" class="section">
-      <h2>Upload Activity</h2>
-      <form id="uploadActivityForm" enctype="multipart/form-data">
-        <input type="text" name="name" placeholder="Activity Name" required>
-        <textarea name="description" placeholder="Activity Description" required></textarea>
-        <input type="text" name="location" placeholder="Location">
-        <input type="file" name="image" accept="image/*" required>
-        <button type="submit">Upload Activity</button>
-      </form>
+    <!-- Available Activities -->
+    <div id="availableActivitiesSection" class="section">
+      <h2>Available Activities</h2>
+      <div id="availableActivitiesList"></div>
     </div>
   </div>
 
@@ -77,8 +53,9 @@
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
-    if (!token || role !== "admin") {
-      alert("You must be logged in as an admin!");
+    // Role-based access: Only users
+    if (!token || role !== "user") {
+      alert("You must be logged in as a user!");
       window.location.href = "login.html";
     }
 
@@ -86,26 +63,24 @@
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
 
-      // Dynamic refresh
-      if(id === 'bookingsSection') loadBookings();
-      if(id === 'packagesSection') loadPackages();
-      if(id === 'activitiesSection') loadActivities();
+      if(id === 'myBookingsSection') loadMyBookings();
+      if(id === 'availablePackagesSection') loadPackages();
+      if(id === 'availableActivitiesSection') loadActivities();
     }
 
-    // Load bookings
-    async function loadBookings() {
+    // Load user's bookings
+    async function loadMyBookings() {
       try {
-        const res = await fetch(`${API_BASE}/api/bookings`, {
+        const res = await fetch(`${API_BASE}/api/bookings/my`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const bookings = await res.json();
-        const container = document.getElementById("bookingsList");
-        container.innerHTML = bookings.length === 0 ? "<p>No bookings yet.</p>" : "";
+        const container = document.getElementById("myBookingsList");
+        container.innerHTML = bookings.length === 0 ? "<p>You have no bookings yet.</p>" : "";
         bookings.forEach(b => {
           const div = document.createElement("div");
           div.classList.add("card");
           div.innerHTML = `
-            <p><strong>User:</strong> ${b.userName || "N/A"}</p>
             <p><strong>Package:</strong> ${b.packageTitle || "N/A"}</p>
             <p><strong>Activity:</strong> ${b.activityName || "N/A"}</p>
             <p><strong>Status:</strong> ${b.status}</p>
@@ -118,15 +93,15 @@
       }
     }
 
-    // Load packages
+    // Load available packages
     async function loadPackages() {
       try {
         const res = await fetch(`${API_BASE}/api/packages`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const packages = await res.json();
-        const container = document.getElementById("packagesList");
-        container.innerHTML = packages.length === 0 ? "<p>No packages yet.</p>" : "";
+        const container = document.getElementById("availablePackagesList");
+        container.innerHTML = packages.length === 0 ? "<p>No packages available.</p>" : "";
         packages.forEach(p => {
           const div = document.createElement("div");
           div.classList.add("card");
@@ -140,15 +115,15 @@
       }
     }
 
-    // Load activities
+    // Load available activities
     async function loadActivities() {
       try {
         const res = await fetch(`${API_BASE}/api/activities`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const activities = await res.json();
-        const container = document.getElementById("activitiesList");
-        container.innerHTML = activities.length === 0 ? "<p>No activities yet.</p>" : "";
+        const container = document.getElementById("availableActivitiesList");
+        container.innerHTML = activities.length === 0 ? "<p>No activities available.</p>" : "";
         activities.forEach(a => {
           const div = document.createElement("div");
           div.classList.add("card");
@@ -163,52 +138,15 @@
       }
     }
 
-    // Upload package
-    document.getElementById('uploadPackageForm').addEventListener('submit', async function(e){
-      e.preventDefault();
-      const formData = new FormData(this);
-      const res = await fetch(`${API_BASE}/api/packages`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-      if(res.ok){
-        alert("Package uploaded successfully!");
-        this.reset();
-        loadPackages(); // dynamically refresh package list
-      } else {
-        const err = await res.text();
-        alert("Package upload failed! " + err);
-      }
-    });
-
-    // Upload activity
-    document.getElementById('uploadActivityForm').addEventListener('submit', async function(e){
-      e.preventDefault();
-      const formData = new FormData(this);
-      const res = await fetch(`${API_BASE}/api/activities`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-      if(res.ok){
-        alert("Activity uploaded successfully!");
-        this.reset();
-        loadActivities(); // dynamically refresh activity list
-      } else {
-        const err = await res.text();
-        alert("Activity upload failed! " + err);
-      }
-    });
-
     function logout() {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
+      localStorage.removeItem("user");
       window.location.href = "login.html";
     }
 
     // Initial load
-    loadBookings();
+    loadMyBookings();
     loadPackages();
     loadActivities();
   </script>
