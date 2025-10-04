@@ -60,31 +60,32 @@
 </div>
 
 <script>
+const API_BASE = "https://mindandmedicineholidays.onrender.com";
+
+// ✅ Check token and role
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
-
 if (!token || role !== "admin") {
   alert("You must be logged in as an admin!");
   window.location.href = "admin-login.html";
 }
 
-const API_BASE = "https://mindandmedicineholidays.onrender.com";
-
 function showSection(id){
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if(id==='bookingsSection') loadBookings();
-  if(id==='packagesSection') loadPackages();
-  if(id==='activitiesSection') loadActivities();
+  if(id === 'bookingsSection') loadBookings();
+  if(id === 'packagesSection') loadPackages();
+  if(id === 'activitiesSection') loadActivities();
 }
 
+// Load bookings
 async function loadBookings(){
   try {
     const res = await fetch(`${API_BASE}/api/bookings`, { headers:{ Authorization:`Bearer ${token}`} });
     const bookings = await res.json();
     const container = document.getElementById("bookingsList");
     container.innerHTML = bookings.length ? "" : "<p>No bookings yet.</p>";
-    bookings.forEach(b=>{
+    bookings.forEach(b => {
       const div = document.createElement("div");
       div.classList.add("card");
       div.innerHTML = `<p><strong>User:</strong> ${b.userName||"N/A"}</p>
@@ -93,39 +94,42 @@ async function loadBookings(){
                        <p><strong>Status:</strong> ${b.status}</p>`;
       container.appendChild(div);
     });
-  } catch(err){ alert("Failed to load bookings! "+err); }
+  } catch(err){ alert("Failed to load bookings! " + err); }
 }
 
+// Load packages
 async function loadPackages(){
   try {
     const res = await fetch(`${API_BASE}/api/packages`, { headers:{ Authorization:`Bearer ${token}`} });
     const packages = await res.json();
     const container = document.getElementById("packagesList");
     container.innerHTML = packages.length ? "" : "<p>No packages yet.</p>";
-    packages.forEach(p=>{
+    packages.forEach(p => {
       const div = document.createElement("div");
       div.classList.add("card");
       div.innerHTML = `<h3>${p.title}</h3><img src="${API_BASE}${p.image}" alt="${p.title}"><p>Price: $${p.price}</p>`;
       container.appendChild(div);
     });
-  } catch(err){ alert("Failed to load packages! "+err); }
+  } catch(err){ alert("Failed to load packages! " + err); }
 }
 
+// Load activities
 async function loadActivities(){
   try {
     const res = await fetch(`${API_BASE}/api/activities`, { headers:{ Authorization:`Bearer ${token}`} });
     const activities = await res.json();
     const container = document.getElementById("activitiesList");
     container.innerHTML = activities.length ? "" : "<p>No activities yet.</p>";
-    activities.forEach(a=>{
+    activities.forEach(a => {
       const div = document.createElement("div");
       div.classList.add("card");
       div.innerHTML = `<h3>${a.name}</h3><img src="${API_BASE}${a.image}" alt="${a.name}"><p>${a.description}</p><p>Location: ${a.location||"N/A"}</p>`;
       container.appendChild(div);
     });
-  } catch(err){ alert("Failed to load activities! "+err); }
+  } catch(err){ alert("Failed to load activities! " + err); }
 }
 
+// Upload forms
 document.getElementById('uploadPackageForm').addEventListener('submit', async function(e){
   e.preventDefault();
   const formData = new FormData(this);
@@ -140,6 +144,7 @@ document.getElementById('uploadActivityForm').addEventListener('submit', async f
   if(res.ok){ alert("Activity uploaded!"); this.reset(); loadActivities(); } else { alert("Upload failed!"); }
 });
 
+// Logout
 function logout(){
   localStorage.removeItem("token");
   localStorage.removeItem("role");
@@ -152,5 +157,6 @@ loadBookings();
 loadPackages();
 loadActivities();
 </script>
+
 </body>
 </html>
