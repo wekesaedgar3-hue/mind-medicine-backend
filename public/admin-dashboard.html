@@ -1,163 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; display: flex; }
-    nav { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
-    nav h3 { margin-top: 0; }
-    nav a { color: white; display: block; margin: 15px 0; text-decoration: none; cursor: pointer; }
-    .content { flex: 1; padding: 30px; background: #f4f4f4; min-height: 100vh; }
-    .section { display: none; }
-    .section.active { display: block; }
-    form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 5px gray; max-width: 500px; }
-    input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
-    textarea { resize: vertical; }
-    button { background: teal; color: white; border: none; cursor: pointer; }
-    button:hover { background: darkcyan; }
-    #status { margin-top: 10px; font-weight: bold; }
-    .card { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; box-shadow: 0 0 5px gray; }
-    img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard</title>
+<style>
+  body { font-family: Arial; margin: 0; display: flex; }
+  nav { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
+  nav h3 { margin-top: 0; }
+  nav a { color: white; display: block; margin: 15px 0; text-decoration: none; cursor: pointer; }
+  .content { flex: 1; padding: 30px; background: #f4f4f4; min-height: 100vh; }
+  .section { display: none; }
+  .section.active { display: block; }
+  form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 5px gray; max-width: 500px; }
+  input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+  textarea { resize: vertical; }
+  button { background: teal; color: white; border: none; cursor: pointer; }
+  button:hover { background: darkcyan; }
+  #status { margin-top: 10px; font-weight: bold; }
+  .card { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; box-shadow: 0 0 5px gray; }
+  img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
+</style>
 </head>
 <body>
   <nav>
-    <h3>Admin Panel</h3>
-    <a onclick="showSection('packagesSection')">Manage Packages</a>
-    <a onclick="showSection('activitiesSection')">Manage Activities</a>
-    <a onclick="showSection('bookingsSection')">View Bookings</a>
+    <h3>Admin Dashboard</h3>
+    <a onclick="showSection('bookingsSection')">Bookings</a>
+    <a onclick="showSection('packagesSection')">Packages</a>
+    <a onclick="showSection('activitiesSection')">Activities</a>
+    <a onclick="showSection('uploadPackageSection')">Upload Package</a>
+    <a onclick="showSection('uploadActivitySection')">Upload Activity</a>
     <a onclick="logout()">Logout</a>
   </nav>
 
   <div class="content">
+    <!-- Bookings -->
+    <div id="bookingsSection" class="section active">
+      <h2>User Bookings</h2>
+      <div id="bookingsList"></div>
+    </div>
+
     <!-- Packages -->
-    <div id="packagesSection" class="section active">
-      <h2>Add New Package</h2>
+    <div id="packagesSection" class="section">
+      <h2>All Packages</h2>
+      <div id="packagesList"></div>
+    </div>
+
+    <!-- Activities -->
+    <div id="activitiesSection" class="section">
+      <h2>All Activities</h2>
+      <div id="activitiesList"></div>
+    </div>
+
+    <!-- Upload Package -->
+    <div id="uploadPackageSection" class="section">
+      <h2>Upload Package</h2>
       <form id="uploadPackageForm" enctype="multipart/form-data">
-        <input type="text" name="title" placeholder="Package Title" required />
-        <input type="number" name="price" placeholder="Price" required />
+        <input type="text" name="title" placeholder="Package Title" required>
+        <input type="number" name="price" placeholder="Price" required>
         <textarea name="description" placeholder="Package Description" required></textarea>
-        <input type="file" name="image" accept="image/*" required />
+        <input type="file" name="image" accept="image/*" required>
         <button type="submit">Upload Package</button>
       </form>
       <p id="packageStatus"></p>
     </div>
 
-    <!-- Activities -->
-    <div id="activitiesSection" class="section">
+    <!-- Upload Activity -->
+    <div id="uploadActivitySection" class="section">
       <h2>Upload Activity</h2>
       <form id="uploadActivityForm" enctype="multipart/form-data">
-        <input type="text" name="name" placeholder="Activity Name" required />
-        <textarea name="description" placeholder="Description" required></textarea>
-        <input type="text" name="location" placeholder="Location (optional)" />
-        <input type="file" name="image" accept="image/*" required />
+        <input type="text" name="name" placeholder="Activity Name" required>
+        <textarea name="description" placeholder="Activity Description" required></textarea>
+        <input type="text" name="location" placeholder="Location (optional)">
+        <input type="file" name="image" accept="image/*" required>
         <button type="submit">Upload Activity</button>
       </form>
       <p id="activityStatus"></p>
     </div>
-
-    <!-- Bookings -->
-    <div id="bookingsSection" class="section">
-      <h2>All Bookings</h2>
-      <div id="bookingsList"></div>
-    </div>
   </div>
 
-  <script>
-    const API_BASE_URL = "https://mindandmedicineholidays.onrender.com";
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
+<script>
+const API_BASE = "https://mindandmedicineholidays.onrender.com";
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("role");
 
-    if (!token || role !== "admin") {
-      alert("You must be logged in as admin!");
-      window.location.href = "index.html";
-    }
+if(!token || role !== "admin"){
+  alert("You must be logged in as an admin!");
+  window.location.href = "admin-login.html";
+}
 
-    function showSection(id){
-      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-      if(id === 'bookingsSection') loadBookings();
-    }
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 
-    // Upload Package
-    document.getElementById("uploadPackageForm").addEventListener("submit", async function(e){
-      e.preventDefault();
-      const formData = new FormData(this);
-      const statusEl = document.getElementById("packageStatus");
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/packages`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.message || "Upload failed");
-        statusEl.textContent = "✅ Package uploaded successfully!";
-        statusEl.style.color = "green";
-        this.reset();
-      } catch(err) {
-        statusEl.textContent = "❌ "+err.message;
-        statusEl.style.color = "red";
-      }
+  if(id === "bookingsSection") loadBookings();
+  if(id === "packagesSection") loadPackages();
+  if(id === "activitiesSection") loadActivities();
+}
+
+// Load bookings
+async function loadBookings(){
+  try{
+    const res = await fetch(`${API_BASE}/api/bookings`, { headers: { Authorization: `Bearer ${token}` } });
+    const bookings = await res.json();
+    const container = document.getElementById("bookingsList");
+    container.innerHTML = bookings.length===0 ? "<p>No bookings yet.</p>" : "";
+    bookings.forEach(b=>{
+      const div = document.createElement("div");
+      div.classList.add("card");
+      div.innerHTML = `<p><strong>User:</strong> ${b.userName || "N/A"}</p>
+                       <p><strong>Package:</strong> ${b.packageTitle || "N/A"}</p>
+                       <p><strong>Activity:</strong> ${b.activityName || "N/A"}</p>
+                       <p><strong>Status:</strong> ${b.status}</p>
+                       <p><strong>Receipt:</strong> ${b.receipt ? `<img src="${API_BASE}${b.receipt}" width="150">` : "N/A"}</p>`;
+      container.appendChild(div);
     });
+  }catch(err){ console.error(err); }
+}
 
-    // Upload Activity
-    document.getElementById("uploadActivityForm").addEventListener("submit", async function(e){
-      e.preventDefault();
-      const formData = new FormData(this);
-      const statusEl = document.getElementById("activityStatus");
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/activities`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.message || "Upload failed");
-        statusEl.textContent = "✅ Activity uploaded successfully!";
-        statusEl.style.color = "green";
-        this.reset();
-      } catch(err) {
-        statusEl.textContent = "❌ "+err.message;
-        statusEl.style.color = "red";
-      }
+// Load packages
+async function loadPackages(){
+  try{
+    const res = await fetch(`${API_BASE}/api/packages`, { headers: { Authorization: `Bearer ${token}` } });
+    const packages = await res.json();
+    const container = document.getElementById("packagesList");
+    container.innerHTML = packages.length===0 ? "<p>No packages yet.</p>" : "";
+    packages.forEach(p=>{
+      const div = document.createElement("div");
+      div.classList.add("card");
+      div.innerHTML = `<h3>${p.title}</h3>
+                       <img src="${API_BASE}${p.image}" alt="${p.title}">
+                       <p>Price: $${p.price}</p>
+                       <p>${p.description}</p>`;
+      container.appendChild(div);
     });
+  }catch(err){ console.error(err); }
+}
 
-    // Load Bookings with User + Package + Activities info
-    async function loadBookings(){
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/bookings`, { 
-          headers: { Authorization: `Bearer ${token}` } 
-        });
-        const bookings = await res.json();
-        const container = document.getElementById("bookingsList");
-        container.innerHTML = "";
-        bookings.forEach(b => {
-          const div = document.createElement("div");
-          div.classList.add("card");
-          div.innerHTML = `
-            <p><strong>User:</strong> ${b.user ? b.user.name + " (" + b.user.email + ")" : "N/A"}</p>
-            <p><strong>Package:</strong> ${b.package ? b.package.title + " - $" + b.package.price : "N/A"}</p>
-            <p><strong>Activities:</strong> ${b.activities && b.activities.length > 0 ? b.activities.join(", ") : "N/A"}</p>
-            <p><strong>Status:</strong> ${b.status}</p>
-          `;
-          container.appendChild(div);
-        });
-      } catch(err) {
-        document.getElementById("bookingsList").innerHTML = "<p>Failed to load bookings.</p>";
-      }
-    }
+// Load activities
+async function loadActivities(){
+  try{
+    const res = await fetch(`${API_BASE}/api/activities`, { headers: { Authorization: `Bearer ${token}` } });
+    const activities = await res.json();
+    const container = document.getElementById("activitiesList");
+    container.innerHTML = activities.length===0 ? "<p>No activities yet.</p>" : "";
+    activities.forEach(a=>{
+      const div = document.createElement("div");
+      div.classList.add("card");
+      div.innerHTML = `<h3>${a.name}</h3>
+                       <img src="${API_BASE}${a.image}" alt="${a.name}">
+                       <p>${a.description}</p>
+                       <p>Location: ${a.location || "N/A"}</p>`;
+      container.appendChild(div);
+    });
+  }catch(err){ console.error(err); }
+}
 
-    function logout(){
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      window.location.href = "index.html";
-    }
-  </script>
+// Upload package
+document.getElementById("uploadPackageForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  try{
+    const res = await fetch(`${API_BASE}/api/packages`, { method:"POST", headers:{ Authorization:`Bearer ${token}` }, body:formData });
+    if(res.ok){ document.getElementById("packageStatus").textContent="Package uploaded!"; e.target.reset(); loadPackages(); }
+    else{ const err = await res.text(); document.getElementById("packageStatus").textContent="Upload failed! "+err; }
+  }catch(err){ document.getElementById("packageStatus").textContent="Error: "+err.message; }
+});
+
+// Upload activity
+document.getElementById("uploadActivityForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  try{
+    const res = await fetch(`${API_BASE}/api/activities`, { method:"POST", headers:{ Authorization:`Bearer ${token}` }, body:formData });
+    if(res.ok){ document.getElementById("activityStatus").textContent="Activity uploaded!"; e.target.reset(); loadActivities(); }
+    else{ const err = await res.text(); document.getElementById("activityStatus").textContent="Upload failed! "+err; }
+  }catch(err){ document.getElementById("activityStatus").textContent="Error: "+err.message; }
+});
+
+function logout(){
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  localStorage.removeItem("user");
+  window.location.href = "admin-login.html";
+}
+
+// Initial load
+loadBookings();
+loadPackages();
+loadActivities();
+</script>
 </body>
 </html>
-
-
-
