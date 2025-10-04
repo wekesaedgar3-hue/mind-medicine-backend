@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mind and Medicine Holidays LTD</title>
 <style>
-  /* Reset */
   * { margin:0; padding:0; box-sizing:border-box; }
 
   body {
@@ -13,16 +12,29 @@
     line-height:1.6;
     background:#f4fdf6;
     color:black;
+    padding-top:100px; /* ✅ prevent content from hiding under fixed header */
   }
 
-  /* Header */
+  /* ===== Fixed Header ===== */
   header {
     background: linear-gradient(rgba(0,100,0,0.7),rgba(0,100,0,0.7)),
                 url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
     color:#fff;
     text-align:center;
-    padding:80px 20px;
-    position:relative;
+    padding:80px 20px 40px 20px;
+    position:fixed;   /* ✅ fixed at top */
+    top:0; left:0;
+    width:100%;
+    z-index:1000;
+  }
+
+  /* Logo */
+  .logo {
+    position:absolute;
+    top:15px;
+    left:20px;
+    width:80px;
+    height:auto;
   }
 
   header h1 { font-size:2.5rem; margin-bottom:10px; letter-spacing:2px; }
@@ -84,7 +96,7 @@
   }
   .btn:hover { background:#228B22; }
 
-  /* Promotional Section Full Width */
+  /* Promotional Section */
   #promo {
     width:100vw;
     height:100vh;
@@ -184,12 +196,14 @@
   input, select { width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px; }
   button { width:100%; padding:12px; border:none; border-radius:8px; background:#388e3c; color:white; font-weight:bold; cursor:pointer; }
   button:hover { background:#4caf50; }
-
 </style>
 </head>
 <body>
 
 <header>
+  <!-- Logo -->
+  <img src="images/logo2.png" alt="Logo" class="logo">
+
   <h1>MIND AND MEDICINE HOLIDAYS LTD</h1>
   <p>2024 - 2025 | mindandmedicineholidays.com</p>
   <a href="#" class="btn" id="openRegisterBtn">Register</a>
@@ -230,8 +244,13 @@
 
 <section id="gallery">
   <h2>GALLERY</h2>
-  <!-- Your new image -->
-  <img src="/images/sunset.jpg" alt="Landing Image" width="600">
+  <img src="images/sunset.jpg" alt="Sunset">
+  <img src="images/dismas.jpg" alt="Dismas">
+  <img src="images/holiday.jpg" alt="Holiday">
+  <img src="images/sunrise.jpg" alt="Sunrise">
+  <img src="images/trip.jpg" alt="Trip">
+  <img src="images/uploaded1.png" alt="Uploaded Image 1">
+  <img src="images/uploaded2.png" alt="Uploaded Image 2">
 </section>
 
 <section id="core-services">
@@ -272,11 +291,10 @@
   <p>© 2025 Mind and Medicine Holidays LTD</p>
 </footer>
 
-<!-- Modals (unchanged) -->
-<!-- keep your register, login modals and script same as before -->
-
 </body>
 </html>
+
+
 
 
 
