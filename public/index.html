@@ -5,292 +5,290 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mind and Medicine Holidays LTD</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:"Segoe UI",Tahoma,Verdana,sans-serif;
+  line-height:1.6;
+  background:#f4fdf6;
+  color:black;
+  overflow-x:hidden;
+}
+/* ===== Header ===== */
+header{
+  position:relative;
+  width:100%;
+  height:80vh;
+  overflow:hidden;
+}
+header img.logo{
+  position:absolute;
+  top:20px;
+  left:25px;
+  width:130px;
+  height:auto;
+  z-index:10;
+}
+.hero-slide{
+  position:absolute;
+  width:100%;height:100%;
+  background-size:cover;
+  background-position:center;
+  opacity:0;
+  transition:opacity 1s ease-in-out;
+}
+.hero-slide.active{opacity:1;}
+.hamburger{
+  position:absolute;
+  top:25px;right:25px;
+  width:30px;height:22px;
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;z-index:15;
+}
+.hamburger span{
+  display:block;height:4px;
+  background:#fff;border-radius:2px;
+}
+.nav-menu{
+  position:fixed;
+  top:0;right:-100%;
+  width:260px;height:100%;
+  background:rgba(0,100,0,0.97);
+  display:flex;flex-direction:column;
+  align-items:center;
+  padding:60px 20px;
+  transition:right .3s ease;
+  z-index:1001;
+}
+.nav-menu.active{right:0;}
+.nav-menu img{
+  width:100px;
+  margin-bottom:20px;
+}
+.nav-menu a{
+  color:#fff;text-decoration:none;
+  margin:12px 0;font-size:1.1rem;
+  transition:.3s;
+}
+.nav-menu a:hover{color:#90ee90;}
+.dots{
+  position:absolute;bottom:15px;
+  left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:5;
+}
+.dot{
+  width:12px;height:12px;border-radius:50%;
+  background:white;opacity:.6;cursor:pointer;
+  transition:.3s;
+}
+.dot.active{background:#ffd700;opacity:1;}
 
-  body {
-    font-family:"Segoe UI",Tahoma,Verdana,sans-serif;
-    line-height:1.6;
-    background:#f4fdf6;
-    color:black;
-  }
+/* ===== Sections ===== */
+section{padding:60px 20px;max-width:1200px;margin:auto;}
+section h2{text-align:center;margin-bottom:30px;font-size:2.2rem;color:#006400;}
 
-  /* ===== Header ===== */
-  header {
-    background: linear-gradient(rgba(0,100,0,0.7),rgba(0,100,0,0.7)),
-                url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
-    color:#fff;
-    text-align:center;
-    padding:80px 20px 40px 20px;
-    position:relative;
-    width:100%;
-  }
+/* ===== Service cards with images ===== */
+.service-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:25px;
+}
+.service-card{
+  background:white;border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  transition:transform .3s, box-shadow .3s;
+}
+.service-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 8px 18px rgba(0,0,0,0.3);
+}
+.service-card img{
+  width:100%;height:200px;object-fit:cover;
+}
+.service-card .content{
+  padding:15px;text-align:center;
+}
+.service-card .content h3{color:#006400;margin-bottom:10px;}
+.service-card .content p{font-size:.95rem;}
 
-  .logo {
-    position:absolute;
-    top:15px;
-    left:20px;
-    width:80px;
-    height:auto;
-  }
+/* ===== Gallery ===== */
+#gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
+#gallery img{
+  width:100%;height:250px;object-fit:cover;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+  transition:transform .3s;
+}
+#gallery img:hover{transform:scale(1.05);}
 
-  header h1 { font-size:2.5rem; margin-bottom:10px; letter-spacing:2px; }
-  header p { font-size:1.2rem; max-width:700px; margin:auto 0 20px 0; }
+/* ===== Footer ===== */
+footer{
+  background:#006400;
+  color:#fff;text-align:center;
+  padding:30px 20px;
+}
+footer img{
+  width:120px;
+  height:auto;margin-bottom:10px;
+}
+footer a{color:#90ee90;text-decoration:none;}
+footer a:hover{text-decoration:underline;}
 
-  .hamburger {
-    position:absolute;
-    top:20px;
-    right:20px;
-    width:30px;
-    height:22px;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    cursor:pointer;
-    z-index:1002;
-  }
-  .hamburger span {
-    display:block;
-    height:4px;
-    background:#fff;
-    border-radius:2px;
-  }
-
-  .nav-menu {
-    position:fixed;
-    top:0;
-    right:-100%;
-    width:250px;
-    height:100%;
-    background:#006400;
-    display:flex;
-    flex-direction:column;
-    padding:60px 20px;
-    transition:right 0.3s ease;
-    z-index:1001;
-  }
-  .nav-menu a {
-    color:#fff;
-    text-decoration:none;
-    margin-bottom:20px;
-    font-size:1.1rem;
-  }
-  .nav-menu a:hover { color:#90ee90; }
-  .nav-menu.active { right:0; }
-
-  .btn {
-    background:#006400;
-    color:#fff;
-    padding:10px 20px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    text-decoration:none;
-    transition:background 0.3s ease-in-out;
-    display:inline-block;
-    margin:10px;
-  }
-  .btn:hover { background:#228B22; }
-
-  #promo {
-    width:100%;
-    height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    overflow:hidden;
-    position:relative;
-  }
-  #promo::before {
-    content:"";
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:url("https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
-    z-index:-2;
-    transition: transform 10s ease-in-out;
-  }
-  #promo::after {
-    content:"";
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,0.4);
-    z-index:-1;
-  }
-  #promo:hover::before { transform:scale(1.1); }
-  #promo div { background:rgba(0,0,0,0.5); padding:20px; border-radius:12px; }
-  #promo h2 { font-size:2.5rem; margin-bottom:10px; color:#ffffff; }
-  #promo p { font-size:1.3rem; margin-bottom:20px; color:#ffffff; }
-  #promo .btn { background:#006400; }
-
-  section { padding:60px 20px; max-width:1200px; margin:auto; }
-  section h2 { text-align:center; margin-bottom:30px; font-size:2.2rem; color:#006400; }
-
-  .card {
-    background:rgba(255,255,255,0.95);
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-    transition:all 0.3s ease-in-out;
-    margin-bottom:20px;
-    color:black;
-  }
-  .card:hover {
-    background:#90ee90;
-    transform:translateY(-5px) scale(1.03);
-    box-shadow:0 8px 20px rgba(0,0,0,0.25);
-  }
-
-  footer { background:#006400; color:#fff; text-align:center; padding:20px; }
-  footer a { color:#90ee90; text-decoration:none; margin:0 10px; }
-  footer a:hover { text-decoration:underline; }
-
-  #gallery {
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-    gap:20px;
-  }
-  #gallery img {
-    width:100%;
-    height:250px;
-    object-fit:cover;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.2);
-    transition:transform 0.3s ease;
-  }
-  #gallery img:hover { transform:scale(1.05); }
-
-  .modal {
-    display:none;
-    position:fixed;
-    z-index:1000;
-    left:0; top:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,0.5);
-    justify-content:center;
-    align-items:center;
-  }
-  .modal-content {
-    background:#fff;
-    padding:2rem;
-    border-radius:12px;
-    box-shadow:0 6px 15px rgba(0,0,0,0.2);
-    width:350px;
-    max-width:90%;
-    text-align:center;
-    position:relative;
-  }
-  .close-btn { position:absolute; top:10px; right:15px; font-size:1.5rem; cursor:pointer; color:#333; }
-  input, select { width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px; }
-  button { width:100%; padding:12px; border:none; border-radius:8px; background:#388e3c; color:white; font-weight:bold; cursor:pointer; }
-  button:hover { background:#4caf50; }
+/* ===== Buttons ===== */
+.btn{
+  background:#006400;color:#fff;
+  padding:10px 20px;border:none;
+  border-radius:6px;text-decoration:none;
+  transition:background .3s;margin:10px;
+}
+.btn:hover{background:#228B22;}
 </style>
 </head>
 <body>
 
 <header>
   <img src="images/logo2.png" alt="Logo" class="logo">
-
-  <h1>MIND AND MEDICINE HOLIDAYS LTD</h1>
-  <p>2024 - 2025 | mindandmedicineholidays.com</p>
-  <a href="#" class="btn" id="openRegisterBtn">Register</a>
-  <a href="#" class="btn" id="openUserLoginBtn">User Login</a>
-
-  <div id="hamburger" class="hamburger">
-    <span></span><span></span><span></span>
-  </div>
-
+  <div class="hero-slide active" style="background-image:url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80');"></div>
+  <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80');"></div>
+  <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1496449903678-68ddcb189a24?auto=format&fit=crop&w=1400&q=80');"></div>
+  <div class="dots"></div>
+  <div id="hamburger" class="hamburger"><span></span><span></span><span></span></div>
   <nav id="navMenu" class="nav-menu">
+    <img src="images/logo2.png" alt="Sidebar Logo">
     <a href="#" id="openRegisterMenu">Register</a>
     <a href="#" id="openUserLoginMenu">User Login</a>
     <a href="#" id="openAdminLoginMenu">Admin Login</a>
     <a href="#core-services">Core Services</a>
     <a href="#additional-services">Additional Services</a>
-    <a href="#blogs">Blogs</a>
-    <a href="#activities">Activities</a>
     <a href="#gallery">Gallery</a>
     <a href="#about-us">About Us</a>
     <a href="#contact">Contact</a>
   </nav>
 </header>
 
-<section id="promo">
-  <div>
-    <h2>Explore Wellness & Healing Holidays Worldwide</h2>
-    <p>Experience curated retreats for body, mind & soul.</p>
-    <a href="#core-services" class="btn">Discover More</a>
+<section id="about-us">
+  <h2>ABOUT US</h2>
+  <div class="card" style="background:rgba(255,255,255,0.95);padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+    <p><b>Mind And Medicine Holidays LTD</b> is a premier travel company specializing in wellness retreats and medical tourism. We curate experiences that merge healing, relaxation, and holistic wellbeing worldwide.</p>
   </div>
 </section>
 
-<section id="about-us">
-  <h2>ABOUT US</h2>
-  <div class="card">
-    <p>Founded in November, <b>Mind And Medicine Holidays LTD</b> is a premier travel company specializing in wellness retreats and medical tourism. We offer curated experiences that combine healing, relaxation, and holistic well-being across the globe.</p>
+<section id="core-services">
+  <h2>CORE SERVICES</h2>
+  <div class="service-grid">
+    <div class="service-card">
+      <img src="https://images.unsplash.com/photo-1556817411-31ae72fa3ea0?auto=format&fit=crop&w=800&q=80" alt="Wellness Retreats">
+      <div class="content">
+        <h3>Wellness Retreats</h3>
+        <p>Yoga, meditation, detox and stress-relief programs in serene destinations.</p>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <!-- ✅ FIXED Medical Tourism Image -->
+      <img src="https://images.unsplash.com/photo-1588776814546-5d01f2b40c33?auto=format&fit=crop&w=800&q=80" alt="Medical Tourism">
+      <div class="content">
+        <h3>Medical Tourism</h3>
+        <p>Access to high-quality healthcare, dental, cosmetic, and holistic treatments abroad.</p>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80" alt="Holistic Healing">
+      <div class="content">
+        <h3>Holistic Healing</h3>
+        <p>Ayurveda, African traditional medicine, Chinese healing, energy therapies & spas.</p>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80" alt="Adventure Mindfulness">
+      <div class="content">
+        <h3>Adventure & Mindfulness</h3>
+        <p>Nature-based retreats combining adventure and mindfulness activities.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="additional-services">
+  <h2>ADDITIONAL SERVICES</h2>
+  <div class="service-grid">
+    <div class="service-card">
+      <!-- ✅ FIXED Additional Services Image -->
+      <img src="https://images.unsplash.com/photo-1521790797524-b2497295b8a0?auto=format&fit=crop&w=800&q=80" alt="Additional Services">
+      <div class="content">
+        <h3>More Offerings</h3>
+        <p>Accommodation bookings, safaris, beach vacations, themed trips, team building & more.</p>
+      </div>
+    </div>
   </div>
 </section>
 
 <section id="gallery">
   <h2>GALLERY</h2>
-
-  <!-- ✅ Local images -->
-  <img src="images/dismas.jpg" alt="Dismas Retreat">
-  <img src="images/sunrise.jpg" alt="Sunrise Wellness">
+  <img src="images/dismas.jpg" alt="Retreat 1">
+  <img src="images/sunrise.jpg" alt="Sunrise">
   <img src="images/sunset.jpg" alt="Sunset">
   <img src="images/trip.jpg" alt="Trip">
-
-  <!-- ✅ Remote images -->
-  <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80" alt="Sunset">
-  <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80" alt="Wellness">
-  <img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&fit=crop&w=900&q=80" alt="Holiday">
   <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=900&q=80" alt="Nature">
-  <img src="https://images.unsplash.com/photo-1496449903678-68ddcb189a24?auto=format&fit=crop&w=900&q=80" alt="Travel">
-  <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=900&q=80" alt="Relaxation">
-</section>
-
-<section id="core-services">
-  <h2>CORE SERVICES</h2>
-  <div class="card"><b>Wellness Retreats</b> — Yoga, fitness, meditation, mental health education, detox, personal training, and stress-relief programs in exotic locations.</div>
-  <div class="card"><b>Medical Tourism</b> — Access to high-quality healthcare, cosmetic surgery, dental treatments, and alternative therapies.</div>
-  <div class="card"><b>Holistic Healing</b> — Ayurveda, Traditional African Medicine, Traditional Chinese Medicine, energy healing, and spa therapies.</div>
-  <div class="card"><b>Adventure & Mindfulness</b> — Nature-based retreats combining adventure travel with mindful practices.</div>
-  <div class="card"><b>Corporate Wellness</b> — Tailored retreats for teams focusing on burnout recovery and mental resilience.</div>
-</section>
-
-<section id="additional-services">
-  <h2>ADDITIONAL SERVICES</h2>
-  <div class="card">Accommodation Bookings | Safari & Hiking Packages | Beach & Holiday Vacations | Themed Trip Packages | Excursions | Transfers | Travel Ticketing | Conferences & Seminars | Business Travel | School Trips | Team Building | Church & NGO Missions</div>
-</section>
-
-<section id="blogs">
-  <h2>BLOGS</h2>
-  <div class="card">Coming soon...</div>
-</section>
-
-<section id="activities">
-  <h2>ACTIVITIES</h2>
-  <div class="card">Yoga, Hiking, Meditation, Detox Programs, Spa Treatments...</div>
 </section>
 
 <section id="contact">
   <h2>CONTACT</h2>
-  <div class="card">
+  <div class="card" style="background:white;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);">
     <p><b>Phone:</b> +254768383527</p>
     <p><b>Email:</b> contact@mindandmedicineholidays.com</p>
     <p><b>Address:</b> JKIA Int. Arrival Lounge, Nairobi, Kenya</p>
-    <p><b>Website:</b> mindandmedicineholidays.com</p>
   </div>
 </section>
 
 <footer>
+  <img src="images/logo2.png" alt="Footer Logo">
   <p>© 2025 Mind and Medicine Holidays LTD</p>
 </footer>
 
 <script>
-  document.getElementById('hamburger').addEventListener('click', () => {
-    document.getElementById('navMenu').classList.toggle('active');
-  });
-</script>
+// ===== Mobile Nav =====
+document.getElementById('hamburger').addEventListener('click',()=>{
+  document.getElementById('navMenu').classList.toggle('active');
+});
 
+// ===== Hero auto slider =====
+const heroSlides=document.querySelectorAll(".hero-slide");
+const dotsContainer=document.querySelector(".dots");
+let heroIndex=0;
+heroSlides.forEach((_,i)=>{
+  const dot=document.createElement("div");
+  dot.classList.add("dot");
+  if(i===0)dot.classList.add("active");
+  dot.addEventListener("click",()=>showHero(i));
+  dotsContainer.appendChild(dot);
+});
+const dots=document.querySelectorAll(".dot");
+function showHero(i){
+  heroSlides.forEach(s=>s.classList.remove("active"));
+  dots.forEach(d=>d.classList.remove("active"));
+  heroSlides[i].classList.add("active");
+  dots[i].classList.add("active");
+  heroIndex=i;
+}
+function autoHero(){
+  heroIndex=(heroIndex+1)%heroSlides.length;
+  showHero(heroIndex);
+}
+setInterval(autoHero,6000);
+
+// ===== Placeholder backend alerts =====
+["openRegisterMenu","openUserLoginMenu","openAdminLoginMenu"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.addEventListener("click",()=>alert("Feature coming soon!"));
+});
+</script>
 </body>
 </html>
