@@ -1,83 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Register - Mind & Medicine Holidays</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-    * { box-sizing: border-box; margin:0; padding:0; }
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #4caf50, #81c784);
-      height:100vh; display:flex; justify-content:center; align-items:center; color:#333; position:relative; overflow:hidden;
-    }
-    body::before, body::after {
-      content: ""; position:absolute; border-radius:50%; opacity:0.15; z-index:-1;
-    }
-    body::before { width:250px; height:250px; background:#ffeb3b; top:50px; left:30px; }
-    body::after { width:300px; height:300px; background:#ff4081; bottom:50px; right:50px; }
-    form { background:#ffffffcc; padding:40px; border-radius:15px; box-shadow:0 15px 30px rgba(0,0,0,0.2); width:350px; text-align:center; transition: transform 0.3s ease; }
-    form:hover { transform: translateY(-5px); }
-    h2 { margin-bottom:30px; color:#388e3c; font-size:28px; text-shadow:1px 1px 2px rgba(0,0,0,0.2); }
-    input, select { width:100%; padding:12px 15px; margin:10px 0; border-radius:8px; border:1px solid #ccc; font-size:16px; }
-    input:focus, select:focus { border-color:#388e3c; box-shadow:0 0 8px rgba(56,142,60,0.3); outline:none; }
-    button { width:100%; padding:12px; margin-top:15px; background:#388e3c; border:none; border-radius:8px; color:white; font-size:18px; font-weight:bold; cursor:pointer; transition:background 0.3s, transform 0.2s; }
-    button:hover { background:#4caf50; transform: scale(1.03); }
-    p { margin-top:15px; font-size:14px; }
-    a { text-decoration:none; color:#388e3c; font-weight:bold; transition: color 0.3s; }
-    a:hover { color:#4caf50; }
-    @media(max-width:400px) { form { width:90%; padding:30px; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Registration</title>
+<style>
+  body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f4f4f4; }
+  form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px gray; width: 350px; }
+  h2 { margin-top: 0; text-align: center; }
+  input, button { width: 100%; padding: 10px; margin-top: 15px; }
+  button { background: teal; color: white; border: none; cursor: pointer; }
+  button:hover { background: darkcyan; }
+  p { text-align: center; margin-top: 10px; }
+  a { color: teal; text-decoration: none; }
+</style>
 </head>
 <body>
-  <form id="registerForm">
-    <h2>Register</h2>
-    <input type="text" placeholder="Full Name" required>
-    <input type="email" placeholder="Email" required>
-    <input type="password" placeholder="Password" required>
-    <select name="role" required>
-      <option value="" disabled selected>Select Role</option>
-      <option value="user">User</option>
-      <option value="admin">Admin</option>
-    </select>
-    <button type="submit">Create Account</button>
-    <p>Already have an account? <a href="login.html">Login</a></p>
-  </form>
 
-  <script>
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+<form id="registerForm" enctype="multipart/form-data">
+  <h2>Create Account</h2>
+  <input type="text" name="fullName" placeholder="Full Name" required>
+  <input type="email" name="email" placeholder="Email" required>
+  <input type="password" name="password" placeholder="Password" required>
+  <input type="file" name="profilePic" accept="image/*">
+  <button type="submit">Register</button>
+  <p>Already have an account? <a href="login.html">Login</a></p>
+</form>
 
-      const fullName = document.querySelector("input[placeholder='Full Name']").value;
-      const email = document.querySelector("input[placeholder='Email']").value;
-      const password = document.querySelector("input[placeholder='Password']").value;
-      const role = document.querySelector("select[name='role']").value;
+<script>
+const API_BASE = "https://mindandmedicineholidays.onrender.com";
 
-      try {
-        const res = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fullName, email, password, role })
-        });
+document.getElementById("registerForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const formData = new FormData(this);
 
-        const data = await res.json();
-        if(res.ok){
-          alert("✅ Registration successful! Please log in.");
-          if(role === "admin"){
-            window.location.href = "admin-login.html";
-          } else {
-            window.location.href = "login.html";
-          }
-        } else {
-          alert("❌ " + (data.message || "Something went wrong."));
-        }
-      } catch(err) {
-        alert("❌ Network error: " + err.message);
-      }
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/register`, {
+      method: "POST",
+      body: formData
     });
-  </script>
+    const result = await res.json();
+
+    if(res.ok){
+      alert("Registration successful! Logging you in...");
+
+      // Auto-login
+      const loginRes = await fetch(`${API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.get("email"), password: formData.get("password") })
+      });
+
+      const loginResult = await loginRes.json();
+      if(loginRes.ok){
+        localStorage.setItem("token", loginResult.token);
+        localStorage.setItem("role", loginResult.user.role);
+        localStorage.setItem("user", JSON.stringify(loginResult.user));
+        window.location.href = "dashboard.html";
+      } else {
+        alert("Login failed after registration: " + loginResult.message);
+      }
+
+    } else {
+      alert(result.message || "Registration failed!");
+    }
+  } catch(err){
+    alert("Server error: " + err);
+  }
+});
+</script>
+
 </body>
 </html>
-
 
 
