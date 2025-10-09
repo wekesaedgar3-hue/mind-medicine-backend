@@ -24,7 +24,7 @@ header img.logo{
   position:absolute;
   top:20px;
   left:25px;
-  width:180px; /* Increased from 130px */
+  width:180px;
   height:auto;
   z-index:10;
 }
@@ -57,12 +57,12 @@ header img.logo{
   display:flex;flex-direction:column;
   align-items:center;
   padding:60px 20px;
-  transition:right .3s ease;
+  transition:right .4s ease;
   z-index:1001;
 }
 .nav-menu.active{right:0;}
 .nav-menu img{
-  width:180px; /* Increased from 100px to match navbar */
+  width:180px;
   height:auto;
   margin-bottom:25px;
 }
@@ -165,6 +165,7 @@ footer a:hover{text-decoration:underline;}
     <a href="#" id="openUserLoginMenu">User Login</a>
     <a href="#" id="openAdminLoginMenu">Admin Login</a>
     <a href="#core-services">Core Services</a>
+    <a href="#medical-tourism">Medical Tourism</a>
     <a href="#additional-services">Additional Services</a>
     <a href="#gallery">Gallery</a>
     <a href="#about-us">About Us</a>
@@ -190,8 +191,8 @@ footer a:hover{text-decoration:underline;}
       </div>
     </div>
 
-    <div class="service-card">
-      <img src="https://images.unsplash.com/photo-1581092795360-14b3d46fda9f?auto=format&fit=crop&w=800&q=80" alt="Medical Tourism">
+    <div id="medical-tourism" class="service-card">
+      <img src="https://images.unsplash.com/photo-1588776814546-3e4e1bdfc971?auto=format&fit=crop&w=800&q=80" alt="Medical Tourism">
       <div class="content">
         <h3>Medical Tourism</h3>
         <p>Access to high-quality healthcare, dental, cosmetic, and holistic treatments abroad.</p>
@@ -253,9 +254,19 @@ footer a:hover{text-decoration:underline;}
 </footer>
 
 <script>
-// ===== Mobile Nav =====
-document.getElementById('hamburger').addEventListener('click',()=>{
-  document.getElementById('navMenu').classList.toggle('active');
+// ===== Mobile Nav (open/close smoothly) =====
+const hamburger = document.getElementById('hamburger');
+const navMenu = document.getElementById('navMenu');
+
+hamburger.addEventListener('click', () => {
+  navMenu.classList.toggle('active');
+});
+
+// Close menu when clicking outside (optional smooth UX)
+document.addEventListener('click', (e) => {
+  if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
+    navMenu.classList.remove('active');
+  }
 });
 
 // ===== Hero auto slider =====
