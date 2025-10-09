@@ -18,12 +18,18 @@ const app = express();
 // ✅ Middleware
 app.use(
   cors({
-    origin: "*", // or replace "*" with your frontend domain for more security
+    origin: [
+      "https://mindandmedicineholidays.onrender.com",
+      "https://www.mindandmedicineholidays.com",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ✅ Ensure upload folders exist
 ["uploads", "uploads/packages", "uploads/bookings"].forEach((dir) => {
@@ -33,7 +39,7 @@ app.use(express.json());
   }
 });
 
-// ✅ Serve uploaded files (images, receipts, etc.)
+// ✅ Serve uploaded files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ Serve frontend static files
@@ -60,17 +66,12 @@ app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 
-// ✅ Fallback route for SPA
-app.use((req, res) => {
-  const indexPath = path.join(__dirname, "public", "index.html");
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send("index.html not found");
-  }
+// ✅ Fallback route for frontend routing (Express 5–compatible)
+app.use((req, res, next) => {
+  res.sendFile(path.join(publicPath, "index.html"));
 });
 
-// Global Error Handler
+// ✅ Global Error Handler
 app.use((err, req, res, next) => {
   console.error("🔥 Error:", err);
   res.status(err.status || 500).json({
@@ -83,11 +84,9 @@ sequelize
   .sync({ alter: true })
   .then(() => {
     console.log("✅ Database connected and models synced (with alter)");
-
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📂 Serving uploads from: http://localhost:${PORT}/uploads`);
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
