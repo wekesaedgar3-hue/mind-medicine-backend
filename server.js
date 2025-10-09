@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -18,18 +19,12 @@ const app = express();
 // ✅ Middleware
 app.use(
   cors({
-    origin: [
-      "https://mindandmedicineholidays.onrender.com",
-      "https://www.mindandmedicineholidays.com",
-    ],
+    origin: "*", // you can replace "*" with your frontend domain for more security
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   })
 );
-
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // ✅ Ensure upload folders exist
 ["uploads", "uploads/packages", "uploads/bookings"].forEach((dir) => {
@@ -39,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
   }
 });
 
-// ✅ Serve uploaded files
+// ✅ Serve uploaded files (images, receipts, etc.)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ Serve frontend static files
@@ -59,16 +54,24 @@ const activityRoutes = require("./routes/activityRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
-// Mount Routes
+// ✅ Mount Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/packages", packageRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 
-// ✅ Fallback route for frontend routing (Express 5–compatible)
+// ✅ Serve index.html ONLY for non-API routes
 app.use((req, res, next) => {
-  res.sendFile(path.join(publicPath, "index.html"));
+  if (req.originalUrl.startsWith("/api/")) {
+    return res.status(404).json({ message: "API route not found" });
+  }
+  const indexPath = path.join(publicPath, "index.html");
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send("index.html not found");
+  }
 });
 
 // ✅ Global Error Handler
@@ -84,13 +87,14 @@ sequelize
   .sync({ alter: true })
   .then(() => {
     console.log("✅ Database connected and models synced (with alter)");
+
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📂 Serving uploads from: http://localhost:${PORT}/uploads`);
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
-
 
 
 
