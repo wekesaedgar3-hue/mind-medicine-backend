@@ -1,76 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Registration</title>
-<style>
-  body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f4f4f4; }
-  form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px gray; width: 350px; }
-  h2 { margin-top: 0; text-align: center; }
-  input, button { width: 100%; padding: 10px; margin-top: 15px; }
-  button { background: teal; color: white; border: none; cursor: pointer; }
-  button:hover { background: darkcyan; }
-  p { text-align: center; margin-top: 10px; }
-  a { color: teal; text-decoration: none; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - Mind & Medicine Holidays</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef3f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    form {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 <body>
+  <form id="registerForm">
+    <h2>Register</h2>
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Register</button>
+  </form>
 
-<form id="registerForm" enctype="multipart/form-data">
-  <h2>Create Account</h2>
-  <input type="text" name="fullName" placeholder="Full Name" required>
-  <input type="email" name="email" placeholder="Email" required>
-  <input type="password" name="password" placeholder="Password" required>
-  <input type="file" name="profilePic" accept="image/*">
-  <button type="submit">Register</button>
-  <p>Already have an account? <a href="login.html">Login</a></p>
-</form>
+  <script>
+    const API_BASE =
+      window.location.hostname === "localhost"
+        ? "http://localhost:5000"
+        : "https://mind-medicine-backend.onrender.com"; // ✅ your backend URL
 
-<script>
-const API_BASE = "https://mindandmedicineholidays.onrender.com";
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-document.getElementById("registerForm").addEventListener("submit", async function(e){
-  e.preventDefault();
-  const formData = new FormData(this);
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-  try {
-    const res = await fetch(`${API_BASE}/api/auth/register`, {
-      method: "POST",
-      body: formData
-    });
-    const result = await res.json();
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        });
 
-    if(res.ok){
-      alert("Registration successful! Logging you in...");
-
-      // Auto-login
-      const loginRes = await fetch(`${API_BASE}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.get("email"), password: formData.get("password") })
-      });
-
-      const loginResult = await loginRes.json();
-      if(loginRes.ok){
-        localStorage.setItem("token", loginResult.token);
-        localStorage.setItem("role", loginResult.user.role);
-        localStorage.setItem("user", JSON.stringify(loginResult.user));
-        window.location.href = "dashboard.html";
-      } else {
-        alert("Login failed after registration: " + loginResult.message);
+        const data = await res.json();
+        if (res.ok) {
+          alert("✅ Registration successful!");
+          window.location.href = "login.html";
+        } else {
+          alert("❌ " + (data.message || "Registration failed"));
+        }
+      } catch (err) {
+        alert("⚠️ Server error — please try again later.");
       }
-
-    } else {
-      alert(result.message || "Registration failed!");
-    }
-  } catch(err){
-    alert("Server error: " + err);
-  }
-});
-</script>
-
+    });
+  </script>
 </body>
 </html>
-
 

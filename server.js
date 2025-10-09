@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -16,14 +15,32 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 
-// ✅ Middleware
+// ✅ CORS Setup (Allow only your frontend + localhost)
+const allowedOrigins = [
+  "http://localhost:5000",
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+  "https://mindandmedicineholidays.com", // 🌍 your live frontend domain
+  "https://mindandmedicineholidays.onrender.com", // if frontend hosted on Render
+];
+
 app.use(
   cors({
-    origin: "*", // you can replace "*" with your frontend domain for more security
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow tools like Postman
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn("⚠️ CORS blocked origin:", origin);
+        callback(new Error(`❌ Not allowed by CORS: ${origin}`));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
+
 app.use(express.json());
 
 // ✅ Ensure upload folders exist
@@ -95,7 +112,6 @@ sequelize
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
-
 
 
 
