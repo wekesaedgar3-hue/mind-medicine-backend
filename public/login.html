@@ -86,12 +86,15 @@
       const data = await res.json();
       console.log("🔐 Login Response:", data);
 
-      if (res.ok && data.token) {
+      if (res.ok && data.token && data.user) {
+        // ✅ Normalize role to lowercase for consistent checks
+        const role = (data.user.role || '').toLowerCase();
+
         // ✅ Store session
         localStorage.setItem("session", JSON.stringify({ token: data.token, user: data.user }));
 
         // ✅ Redirect based on role
-        if (data.user.role === "admin") {
+        if (role === "admin") {
           window.location.href = "admin-dashboard.html";
         } else {
           window.location.href = "user-dashboard.html";
@@ -108,5 +111,6 @@
   </script>
 </body>
 </html>
+
 
 
