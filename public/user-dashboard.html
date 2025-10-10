@@ -111,14 +111,10 @@
   </div>
 
   <script>
-    // ✅ Automatically switch between local and Render backend
-    const API_BASE = window.location.hostname.includes("localhost")
-      ? "http://localhost:5000"
-      : "https://mind-medicine-backend.onrender.com";
+    const API_BASE = "https://mindandmedicineholidays.onrender.com";
 
-    const session = JSON.parse(localStorage.getItem("user_session") || "null");
-
-    if (!session || !session.token) {
+    const session = JSON.parse(localStorage.getItem("session"));
+    if (!session || !session.token || session.role !== "user") {
       alert("Please log in first.");
       window.location.href = "login.html";
     }
@@ -128,7 +124,6 @@
       Authorization: `Bearer ${session.token}`
     };
 
-    // ✅ Load user profile
     async function loadProfile() {
       try {
         const res = await fetch(`${API_BASE}/api/auth/me`, { headers });
@@ -141,12 +136,10 @@
         }
       } catch (err) {
         console.error("Profile error:", err);
-        alert("Unable to load profile. Please log in again.");
         logout();
       }
     }
 
-    // ✅ Load user bookings
     async function loadBookings() {
       const body = document.getElementById("bookingsBody");
       try {
@@ -172,7 +165,6 @@
       }
     }
 
-    // ✅ Load available activities
     async function loadActivities() {
       const list = document.getElementById("activitiesList");
       try {
@@ -195,19 +187,19 @@
     }
 
     function logout() {
-      localStorage.removeItem("user_session");
+      localStorage.removeItem("session");
       window.location.href = "login.html";
     }
 
     document.getElementById("logoutBtn").addEventListener("click", logout);
 
-    // ✅ Initialize dashboard
     loadProfile();
     loadBookings();
     loadActivities();
   </script>
 </body>
 </html>
+
 
 
 

@@ -63,10 +63,9 @@
 
 <script>
 const API_BASE = "https://mindandmedicineholidays.onrender.com";
-const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
+const session = JSON.parse(localStorage.getItem("session"));
 
-if (!token || role !== "admin") {
+if (!session || !session.token || session.role !== "admin") {
   alert("You must be logged in as an admin!");
   window.location.href = "admin-login.html";
 }
@@ -82,8 +81,7 @@ function showSection(id){
 // ✅ Fetch Bookings
 async function loadBookings(){
   try {
-    const res = await fetch(`${API_BASE}/api/bookings`, { headers:{ Authorization:`Bearer ${token}` }});
-    if(!res.ok) throw new Error(await res.text());
+    const res = await fetch(`${API_BASE}/api/bookings`, { headers:{ Authorization:`Bearer ${session.token}` }});
     const bookings = await res.json();
     const list = document.getElementById("bookingsList");
     list.innerHTML = bookings.length ? "" : "<p>No bookings yet.</p>";
@@ -105,7 +103,6 @@ async function loadBookings(){
 async function loadPackages(){
   try {
     const res = await fetch(`${API_BASE}/api/packages`);
-    if(!res.ok) throw new Error(await res.text());
     const packages = await res.json();
     const list = document.getElementById("packagesList");
     list.innerHTML = packages.length ? "" : "<p>No packages found.</p>";
@@ -125,7 +122,6 @@ async function loadPackages(){
 async function loadActivities(){
   try {
     const res = await fetch(`${API_BASE}/api/activities`);
-    if(!res.ok) throw new Error(await res.text());
     const activities = await res.json();
     const list = document.getElementById("activitiesList");
     list.innerHTML = activities.length ? "" : "<p>No activities found.</p>";
@@ -145,7 +141,7 @@ async function loadActivities(){
 document.getElementById("uploadPackageForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const data = new FormData(e.target);
-  const res = await fetch(`${API_BASE}/api/packages`, { method:"POST", headers:{ Authorization:`Bearer ${token}` }, body:data });
+  const res = await fetch(`${API_BASE}/api/packages`, { method:"POST", headers:{ Authorization:`Bearer ${session.token}` }, body:data });
   if(res.ok){ alert("✅ Package uploaded!"); e.target.reset(); loadPackages(); } 
   else alert("❌ Upload failed!");
 });
@@ -153,18 +149,16 @@ document.getElementById("uploadPackageForm").addEventListener("submit", async (e
 document.getElementById("uploadActivityForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const data = new FormData(e.target);
-  const res = await fetch(`${API_BASE}/api/activities`, { method:"POST", headers:{ Authorization:`Bearer ${token}` }, body:data });
+  const res = await fetch(`${API_BASE}/api/activities`, { method:"POST", headers:{ Authorization:`Bearer ${session.token}` }, body:data });
   if(res.ok){ alert("✅ Activity uploaded!"); e.target.reset(); loadActivities(); } 
   else alert("❌ Upload failed!");
 });
 
-// ✅ Logout
 function logout(){
-  localStorage.clear();
+  localStorage.removeItem("session");
   window.location.href = "admin-login.html";
 }
 
-// ✅ Initial load
 loadBookings();
 loadPackages();
 loadActivities();
@@ -172,3 +166,4 @@ loadActivities();
 
 </body>
 </html>
+

@@ -23,6 +23,7 @@
     h2 {
       text-align: center;
       color: #2a4d69;
+      margin-bottom: 20px;
     }
     input, button {
       width: 100%;
@@ -66,15 +67,18 @@
   </div>
 
   <script>
-    // ✅ Set your backend URL here
-    const backendUrl = "https://mindandmedicineholidays.onrender.com";
+    // ✅ Automatically detect local or deployed backend
+    const backendUrl = window.location.hostname.includes("localhost")
+      ? "http://localhost:5000"
+      : "https://mindandmedicineholidays.onrender.com";
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
 
-      if(!email || !password){
+      if (!email || !password) {
         alert("⚠️ Please enter both email and password.");
         return;
       }
@@ -85,15 +89,24 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })
         });
+
         const data = await res.json();
 
-        if (res.ok) {
+        if (res.ok && data.token) {
           alert("✅ Login successful!");
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("role", data.role);
 
-          // Redirect by role
-          if (data.role === "admin") {
+          // ✅ Save session correctly
+          localStorage.setItem(
+            "session",
+            JSON.stringify({
+              token: data.token,
+              role: data.role || data.user?.role || "user",
+            })
+          );
+
+          // ✅ Redirect user by role
+          const role = data.role || data.user?.role;
+          if (role === "admin") {
             window.location.href = "admin-dashboard.html";
           } else {
             window.location.href = "user-dashboard.html";
@@ -102,7 +115,6 @@
         } else {
           alert(`❌ ${data.message || "Invalid credentials."}`);
         }
-
       } catch (err) {
         console.error(err);
         alert("⚠️ Unable to connect to backend.");
@@ -111,6 +123,7 @@
   </script>
 </body>
 </html>
+
 
 
 
