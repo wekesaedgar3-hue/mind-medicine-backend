@@ -19,12 +19,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS setup
+// ✅ CORS setup — allow frontend + backend both on Render
 const allowedOrigins = [
   "http://localhost:5000",
   "http://127.0.0.1:5500",
   "http://localhost:5500",
   "https://mind-medicine-backend.onrender.com",
+  "https://mindandmedicineholidays.onrender.com" // ✅ added frontend domain
 ];
 
 app.use(
@@ -94,6 +95,7 @@ sequelize
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
+
 
 
 
