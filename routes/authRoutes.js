@@ -35,10 +35,10 @@ router.post("/login", authController.login);
 // ✅ Authenticated route (to verify current session)
 router.get("/me", authenticate, async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.user; // this comes from authenticate middleware
     res.json({
       id: user.id,
-      name: user.name,
+      fullName: user.fullName,          // <-- use fullName
       email: user.email,
       role: user.role,
       profilePicture: user.profilePicture || null,
@@ -50,6 +50,7 @@ router.get("/me", authenticate, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
