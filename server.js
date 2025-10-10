@@ -22,9 +22,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // ✅ CORS setup (Allow local + both Render apps)
 const allowedOrigins = [
-  "http://localhost:5500",              // Local Live Server
-  "http://127.0.0.1:5500",             // Alternative local
-  "http://localhost:5000",             // Local backend testing
+  "http://localhost:5500",               // Local Live Server
+  "http://127.0.0.1:5500",              // Alternate local
+  "http://localhost:5000",              // Local backend
   "https://mind-medicine-backend.onrender.com", // Backend Render
   "https://mindandmedicineholidays.onrender.com" // Frontend Render
 ];
@@ -72,8 +72,8 @@ fs.readdirSync(routesPath).forEach((file) => {
   }
 });
 
-// ✅ Default route for SPA
-app.get(/.*/, (req, res) => {
+// ✅ Only handle frontend routes, not /api calls
+app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
 
@@ -97,6 +97,7 @@ sequelize
     });
   })
   .catch((err) => console.error("❌ Database connection error:", err));
+
 
 
 
