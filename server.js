@@ -43,8 +43,8 @@ app.use(
 
 app.use(express.json());
 
-// ✅ Ensure upload folders exist
-["uploads", "uploads/packages", "uploads/bookings"].forEach((dir) => {
+// ✅ Ensure upload folders exist (added profiles)
+["uploads", "uploads/packages", "uploads/bookings", "uploads/profiles"].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
     console.log(`📂 Created folder: ${dir}`);

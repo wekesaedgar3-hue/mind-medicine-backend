@@ -39,6 +39,17 @@
     button:hover {
       background: #1e3b52;
     }
+    .link {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .link a {
+      text-decoration: none;
+      color: #2a4d69;
+    }
+    .link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -49,16 +60,16 @@
       <input type="password" id="password" placeholder="Password" required />
       <button type="submit">Login</button>
     </form>
-    <p style="text-align:center;margin-top:10px;">
+    <p class="link">
       <a href="register.html">Don’t have an account? Register</a>
     </p>
   </div>
 
   <script>
-    // ✅ Dynamic backend URL detection
+    // ✅ Detect backend automatically
     const API_BASE = window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://mind-medicine-backend.onrender.com"; // replace with your backend Render URL if different
+      : "https://mind-medicine-backend.onrender.com"; // change if different
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -66,8 +77,12 @@
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
 
+      if (!email || !password) {
+        alert("⚠️ Please enter both email and password.");
+        return;
+      }
+
       try {
-        // ✅ FIXED endpoint
         const res = await fetch(`${API_BASE}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -79,12 +94,12 @@
         if (res.ok) {
           alert("✅ Login successful!");
           localStorage.setItem("mmh_user", JSON.stringify(data.user));
-          window.location = "index.html";
+          window.location.href = "index.html"; // redirect after login
         } else {
           alert(`❌ ${data.message || "Invalid credentials"}`);
         }
       } catch (err) {
-        alert("⚠️ Error connecting to server. Check backend deployment.");
+        alert("⚠️ Unable to connect to server. Please try again later.");
       }
     });
   </script>

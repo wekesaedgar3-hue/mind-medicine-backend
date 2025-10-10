@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,7 +60,7 @@
     // ✅ Dynamic backend URL detection
     const API_BASE = window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://mind-medicine-backend.onrender.com"; // replace with your backend Render URL if different
+      : "https://mind-medicine-backend.onrender.com";
 
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -69,11 +70,11 @@
       const password = document.getElementById("password").value.trim();
 
       try {
-        // ✅ FIXED endpoint
+        // ✅ Fixed field name — matches backend
         const res = await fetch(`${API_BASE}/api/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify({ fullName: name, email, password })
         });
 
         const data = await res.json();
