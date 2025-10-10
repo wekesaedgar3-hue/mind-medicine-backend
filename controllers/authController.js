@@ -62,6 +62,7 @@ exports.login = async (req, res) => {
     res.json({
       message: "Login successful",
       token,
+      role: user.role, // ✅ Added role explicitly
       user: {
         id: user.id,
         fullName: user.fullName,
@@ -75,6 +76,7 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 

@@ -66,7 +66,8 @@
   </div>
 
   <script>
-    const API_BASE = "";
+    // ✅ Set your backend URL here
+    const backendUrl = "https://mindandmedicineholidays.onrender.com";
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -79,25 +80,37 @@
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/auth/login`, {
+        const res = await fetch(`${backendUrl}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })
         });
         const data = await res.json();
+
         if (res.ok) {
           alert("✅ Login successful!");
-          localStorage.setItem("mmh_user", JSON.stringify(data.user));
-          window.location.href = "index.html";
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("role", data.role);
+
+          // Redirect by role
+          if (data.role === "admin") {
+            window.location.href = "admin-dashboard.html";
+          } else {
+            window.location.href = "user-dashboard.html";
+          }
+
         } else {
           alert(`❌ ${data.message || "Invalid credentials."}`);
         }
+
       } catch (err) {
+        console.error(err);
         alert("⚠️ Unable to connect to backend.");
       }
     });
   </script>
 </body>
 </html>
+
 
 
