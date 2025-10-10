@@ -1,7 +1,8 @@
+// middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// Authenticate any logged-in user
+// ✅ Authenticate user via JWT
 exports.authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -12,19 +13,26 @@ exports.authenticate = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = await User.findByPk(decoded.id);
-    if (!req.user) return res.status(401).json({ message: "User not found" });
+    const user = await User.findByPk(decoded.id);
+    if (!user) {
+      return res.status(401).json({ message: "User not found or deleted" });
+    }
 
+    req.user = user;
     next();
   } catch (err) {
-    console.error("Auth middleware error:", err);
-    return res.status(401).json({ message: "Invalid token" });
+    console.error("Auth Middleware Error:", err.message);
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Session expired. Please log in again." });
+    }
+    return res.status(401).json({ message: "Invalid token. Please log in again." });
   }
 };
 
-// Check if user is admin
+// ✅ Only admins can access admin routes
 exports.isAdmin = (req, res, next) => {
   if (req.user && req.user.role === "admin") return next();
   return res.status(403).json({ message: "Access denied, admin only" });
 };
+
 
