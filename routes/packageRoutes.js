@@ -1,51 +1,40 @@
-// routes/packageRoutes.js
 const express = require("express");
 const router = express.Router();
-const packageController = require("../controllers/packageController");
-const adminMiddleware = require("../middleware/adminMiddleware");
-const upload = require("../middleware/uploadPackages");
+const multer = require("multer");
+const path = require("path");
+const { authenticate, isAdmin } = require("../middleware/authMiddleware");
+const Package = require("../models/Package");
 
-// ✅ Public: Get all packages
-router.get("/", packageController.getAllPackages);
+// ✅ Multer setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/packages/"),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({ storage });
 
-// ✅ Public: Get packages by category
-router.get("/category/:category", packageController.getPackagesByCategory);
+// ✅ Get all packages (public)
+router.get("/", async (req, res) => {
+  try {
+    const packages = await Package.findAll();
+    res.json(packages);
+  } catch (err) {
+    console.error("Error loading packages:", err);
+    res.status(500).json({ message: "Server error loading packages" });
+  }
+});
 
-// ✅ Admin: Create package
-router.post(
-  "/",
-  adminMiddleware,
-  (req, res, next) => {
-    upload.single("image")(req, res, function (err) {
-      if (err) return res.status(400).json({ message: err.message });
-      next();
-    });
-  },
-  packageController.createPackage
-);
+// ✅ Upload new package (admin only)
+router.post("/", authenticate, isAdmin, upload.single("image"), async (req, res) => {
+  try {
+    const { title, description, price, category } = req.body;
+    const image = req.file ? `/uploads/packages/${req.file.filename}` : null;
 
-// ✅ Admin: Update package
-router.put(
-  "/:id",
-  adminMiddleware,
-  (req, res, next) => {
-    upload.single("image")(req, res, function (err) {
-      if (err) return res.status(400).json({ message: err.message });
-      next();
-    });
-  },
-  packageController.updatePackage
-);
-
-// ✅ Admin: Delete package
-router.delete("/:id", adminMiddleware, packageController.deletePackage);
+    const newPackage = await Package.create({ title, description, price, category, image });
+    res.json(newPackage);
+  } catch (err) {
+    console.error("Error uploading package:", err);
+    res.status(500).json({ message: "Server error uploading package" });
+  }
+});
 
 module.exports = router;
-
-
-
-
-
-
-
-

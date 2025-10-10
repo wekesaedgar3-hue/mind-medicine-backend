@@ -16,25 +16,23 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 
-// ✅ Express JSON middleware
+// ✅ Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS setup (Allow local + both Render apps)
+// ✅ CORS setup (Allow local + Render apps)
 const allowedOrigins = [
-  "http://localhost:5500", // Local Live Server
-  "http://127.0.0.1:5500", // Alternate local
-  "http://localhost:5000", // Local backend
-  "https://mind-medicine-backend.onrender.com", // Backend Render
-  "https://mindandmedicineholidays.onrender.com" // Frontend Render
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+  "http://localhost:5000",
+  "https://mind-medicine-backend.onrender.com",
+  "https://mindandmedicineholidays.onrender.com"
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
       console.warn("⚠️ Blocked by CORS:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
@@ -49,7 +47,7 @@ app.use(
   "uploads/packages",
   "uploads/bookings",
   "uploads/profiles",
-  "uploads/activities",
+  "uploads/activities"
 ].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -62,26 +60,26 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
 
-// ✅ Import all models (for associations)
+// ✅ Import models
 ["User", "Package", "Activity", "Booking"].forEach((model) =>
   require(`./models/${model}`)
 );
 
-// ✅ Auto-load all routes
-const routesPath = path.join(__dirname, "routes");
-fs.readdirSync(routesPath).forEach((file) => {
-  if (file.endsWith(".js")) {
-    const route = require(path.join(routesPath, file));
-    const routeName = file.replace("Routes.js", "").toLowerCase();
-    app.use(`/api/${routeName}`, route);
-    console.log(`✅ Mounted route: /api/${routeName}`);
-  }
-});
+// ✅ Import route files
+const authRoutes = require("./routes/authRoutes");
+const packageRoutes = require("./routes/packageRoutes");
+const activityRoutes = require("./routes/activityRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
-// ✅ Ensure /api/auth is explicitly mounted (important for login)
-app.use("/api/auth", require("./routes/authRoutes"));
+// ✅ Mount routes
+app.use("/api/auth", authRoutes);
+app.use("/api/packages", packageRoutes);
+app.use("/api/activities", activityRoutes);
+app.use("/api/bookings", bookingRoutes);
 
-// ✅ Serve frontend ONLY for non-API routes
+console.log("✅ Routes mounted: /api/auth, /api/packages, /api/activities, /api/bookings");
+
+// ✅ Serve frontend (for non-API routes)
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });

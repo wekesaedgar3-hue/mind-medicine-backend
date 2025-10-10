@@ -1,50 +1,41 @@
-// routes/activityRoutes.js
 const express = require("express");
 const router = express.Router();
-const activityController = require("../controllers/activityController");
-const upload = require("../middleware/uploadPackages"); // For activity images
+const multer = require("multer");
+const path = require("path");
 const { authenticate, isAdmin } = require("../middleware/authMiddleware");
+const Activity = require("../models/Activity");
 
-// ✅ Public: Get all activities
-router.get("/", activityController.getActivities);
+// ✅ Multer setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/activities/"),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({ storage });
 
-// ✅ Admin: Create activity (with optional image)
-router.post(
-  "/",
-  authenticate,
-  isAdmin,
-  upload.single("activityImage"),
-  activityController.createActivity
-);
-
-// ✅ Admin: Delete activity
-router.delete("/:id", authenticate, isAdmin, async (req, res) => {
+// ✅ Get all activities (public)
+router.get("/", async (req, res) => {
   try {
-    const activity = await require("../models/Activity").findByPk(req.params.id);
-    if (!activity) return res.status(404).json({ message: "Activity not found" });
-
-    await activity.destroy();
-    res.json({ message: "Activity deleted" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const activities = await Activity.findAll();
+    res.json(activities);
+  } catch (err) {
+    console.error("Error loading activities:", err);
+    res.status(500).json({ message: "Server error loading activities" });
   }
 });
 
-// ✅ Admin: Upload activity image only
-router.post(
-  "/upload-activity",
-  authenticate,
-  isAdmin,
-  upload.single("activityImage"),
-  (req, res) => {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+// ✅ Upload new activity (admin only)
+router.post("/", authenticate, isAdmin, upload.single("image"), async (req, res) => {
+  try {
+    const { name, description, location } = req.body;
+    const image = req.file ? `/uploads/activities/${req.file.filename}` : null;
 
-    res.json({
-      message: "Activity image uploaded successfully!",
-      filePath: `/uploads/activities/${req.file.filename}`,
-    });
+    const newActivity = await Activity.create({ name, description, location, image });
+    res.json(newActivity);
+  } catch (err) {
+    console.error("Error uploading activity:", err);
+    res.status(500).json({ message: "Server error uploading activity" });
   }
-);
+});
 
 module.exports = router;
 
