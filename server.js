@@ -27,7 +27,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow tools like Postman
+      if (!origin) return callback(null, true); // allow Postman, mobile apps, etc.
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -78,19 +78,6 @@ app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 
-// ✅ Serve index.html ONLY for non-API routes
-app.use((req, res, next) => {
-  if (req.originalUrl.startsWith("/api/")) {
-    return res.status(404).json({ message: "API route not found" });
-  }
-  const indexPath = path.join(publicPath, "index.html");
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send("index.html not found");
-  }
-});
-
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
   console.error("🔥 Error:", err);
@@ -109,9 +96,11 @@ sequelize
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📂 Serving uploads from: http://localhost:${PORT}/uploads`);
+      console.log(`🌐 Public folder: ${publicPath}`);
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
+
 
 
 
