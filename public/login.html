@@ -70,6 +70,7 @@
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
 
@@ -82,7 +83,8 @@
         const res = await fetch(`${backendUrl}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email, password }),
+          credentials: "include"
         });
 
         const data = await res.json();
@@ -91,25 +93,20 @@
         if (res.ok && data.token) {
           alert("✅ Login successful!");
 
-          // ✅ Always store in same format expected by dashboard
-          localStorage.setItem("user_session", JSON.stringify({
+          // ✅ Store session properly
+          const userSession = {
             token: data.token,
-            role: data.user?.role || data.role || "user",
-            user: {
-              id: data.user?.id,
-              name: data.user?.name,
-              email: data.user?.email
-            }
-          }));
+            role: data.user?.role || "user",
+            user: data.user || {}
+          };
+          localStorage.setItem("user_session", JSON.stringify(userSession));
 
-          // ✅ Redirect by role
-          const role = data.user?.role || data.role || "user";
-          if (role === "admin") {
+          // ✅ Redirect based on role
+          if (userSession.role === "admin") {
             window.location.href = "admin-dashboard.html";
           } else {
             window.location.href = "user-dashboard.html";
           }
-
         } else {
           alert(`❌ ${data.message || "Invalid credentials."}`);
         }
@@ -122,9 +119,4 @@
   </script>
 </body>
 </html>
-
-
-
-
-
 

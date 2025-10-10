@@ -113,23 +113,30 @@
   <script>
     const API_BASE = "https://mindandmedicineholidays.onrender.com";
 
-    // ✅ Use correct key name
-    const session = JSON.parse(localStorage.getItem("user_session") || "null");
-
-    if (!session || !session.token || session.role !== "user") {
+    const sessionData = localStorage.getItem("user_session");
+    if (!sessionData) {
       alert("Please log in first.");
+      window.location.href = "login.html";
+    }
+
+    const session = JSON.parse(sessionData);
+    const token = session?.token;
+
+    if (!token) {
+      alert("Invalid session. Please log in again.");
+      localStorage.removeItem("user_session");
       window.location.href = "login.html";
     }
 
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${session.token}`
+      Authorization: `Bearer ${token}`
     };
 
     async function loadProfile() {
       try {
         const res = await fetch(`${API_BASE}/api/auth/me`, { headers });
-        if (!res.ok) throw new Error("Failed to fetch profile");
+        if (!res.ok) throw new Error("Invalid session or token expired.");
         const user = await res.json();
         document.getElementById("userName").textContent = user.name || "N/A";
         document.getElementById("userEmail").textContent = user.email || "N/A";
@@ -138,6 +145,7 @@
         }
       } catch (err) {
         console.error("Profile error:", err);
+        alert("⚠️ Session expired. Please log in again.");
         logout();
       }
     }
@@ -146,10 +154,14 @@
       const body = document.getElementById("bookingsBody");
       try {
         const res = await fetch(`${API_BASE}/api/bookings`, { headers });
-        if (!res.ok) throw new Error("Failed to fetch bookings");
         const bookings = await res.json();
 
-        if (!Array.isArray(bookings) || bookings.length === 0) {
+        if (!res.ok || !Array.isArray(bookings)) {
+          body.innerHTML = `<tr><td colspan="3">Error loading bookings.</td></tr>`;
+          return;
+        }
+
+        if (bookings.length === 0) {
           body.innerHTML = `<tr><td colspan="3">No bookings yet.</td></tr>`;
           return;
         }
@@ -171,17 +183,15 @@
       const list = document.getElementById("activitiesList");
       try {
         const res = await fetch(`${API_BASE}/api/activities`);
-        if (!res.ok) throw new Error("Failed to fetch activities");
         const activities = await res.json();
-
-        if (!Array.isArray(activities) || activities.length === 0) {
-          list.innerHTML = `<li>No activities available.</li>`;
+        if (!res.ok || !Array.isArray(activities)) {
+          list.innerHTML = `<li>Error loading activities.</li>`;
           return;
         }
 
-        list.innerHTML = activities
-          .map(a => `<li><strong>${a.name}</strong> — ${a.description || ""}</li>`)
-          .join("");
+        list.innerHTML = activities.length
+          ? activities.map(a => `<li><strong>${a.name}</strong> — ${a.description || ""}</li>`).join("")
+          : `<li>No activities available.</li>`;
       } catch (err) {
         console.error("Activity error:", err);
         list.innerHTML = `<li>Error loading activities.</li>`;
@@ -195,18 +205,10 @@
 
     document.getElementById("logoutBtn").addEventListener("click", logout);
 
+    // ✅ Load everything safely
     loadProfile();
     loadBookings();
     loadActivities();
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
