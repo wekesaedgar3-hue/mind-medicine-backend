@@ -41,7 +41,9 @@
     <h2>Upload Package</h2>
     <form id="uploadPackageForm" enctype="multipart/form-data">
       <input type="text" name="title" placeholder="Package Title" required>
-      <input type="text" name="price" placeholder="Price" required>
+      <input type="number" name="price" placeholder="Price" required>
+      <textarea name="description" placeholder="Description" required></textarea>
+      <input type="text" name="category" placeholder="Category" required>
       <input type="file" name="image" accept="image/*" required>
       <button type="submit">Upload Package</button>
     </form>
@@ -61,10 +63,9 @@
 
 <script>
 const API_BASE = "https://mindandmedicineholidays.onrender.com";
-
-// ✅ Check token and role
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
+
 if (!token || role !== "admin") {
   alert("You must be logged in as an admin!");
   window.location.href = "admin-login.html";
@@ -78,81 +79,92 @@ function showSection(id){
   if(id === 'activitiesSection') loadActivities();
 }
 
-// Load bookings
+// ✅ Fetch Bookings
 async function loadBookings(){
   try {
-    const res = await fetch(`${API_BASE}/api/bookings`, { headers:{ Authorization:`Bearer ${token}`} });
+    const res = await fetch(`${API_BASE}/api/bookings`, { headers:{ Authorization:`Bearer ${token}` }});
+    if(!res.ok) throw new Error(await res.text());
     const bookings = await res.json();
-    const container = document.getElementById("bookingsList");
-    container.innerHTML = bookings.length ? "" : "<p>No bookings yet.</p>";
+    const list = document.getElementById("bookingsList");
+    list.innerHTML = bookings.length ? "" : "<p>No bookings yet.</p>";
     bookings.forEach(b => {
       const div = document.createElement("div");
       div.classList.add("card");
-      div.innerHTML = `<p><strong>User:</strong> ${b.userName||"N/A"}</p>
-                       <p><strong>Package:</strong> ${b.packageTitle||"N/A"}</p>
-                       <p><strong>Activity:</strong> ${b.activityName||"N/A"}</p>
-                       <p><strong>Status:</strong> ${b.status}</p>`;
-      container.appendChild(div);
+      div.innerHTML = `<p><b>User:</b> ${b.userId}</p>
+                       <p><b>Package:</b> ${b.packageId}</p>
+                       <p><b>Status:</b> ${b.status || "Pending"}</p>`;
+      list.appendChild(div);
     });
-  } catch(err){ alert("Failed to load bookings! " + err); }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load bookings!");
+  }
 }
 
-// Load packages
+// ✅ Fetch Packages
 async function loadPackages(){
   try {
-    const res = await fetch(`${API_BASE}/api/packages`, { headers:{ Authorization:`Bearer ${token}`} });
+    const res = await fetch(`${API_BASE}/api/packages`);
+    if(!res.ok) throw new Error(await res.text());
     const packages = await res.json();
-    const container = document.getElementById("packagesList");
-    container.innerHTML = packages.length ? "" : "<p>No packages yet.</p>";
+    const list = document.getElementById("packagesList");
+    list.innerHTML = packages.length ? "" : "<p>No packages found.</p>";
     packages.forEach(p => {
       const div = document.createElement("div");
       div.classList.add("card");
-      div.innerHTML = `<h3>${p.title}</h3><img src="${API_BASE}${p.image}" alt="${p.title}"><p>Price: $${p.price}</p>`;
-      container.appendChild(div);
+      div.innerHTML = `<h3>${p.title}</h3><img src="${API_BASE}${p.image}" alt="${p.title}"><p>${p.description}</p>`;
+      list.appendChild(div);
     });
-  } catch(err){ alert("Failed to load packages! " + err); }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load packages!");
+  }
 }
 
-// Load activities
+// ✅ Fetch Activities
 async function loadActivities(){
   try {
-    const res = await fetch(`${API_BASE}/api/activities`, { headers:{ Authorization:`Bearer ${token}`} });
+    const res = await fetch(`${API_BASE}/api/activities`);
+    if(!res.ok) throw new Error(await res.text());
     const activities = await res.json();
-    const container = document.getElementById("activitiesList");
-    container.innerHTML = activities.length ? "" : "<p>No activities yet.</p>";
+    const list = document.getElementById("activitiesList");
+    list.innerHTML = activities.length ? "" : "<p>No activities found.</p>";
     activities.forEach(a => {
       const div = document.createElement("div");
       div.classList.add("card");
-      div.innerHTML = `<h3>${a.name}</h3><img src="${API_BASE}${a.image}" alt="${a.name}"><p>${a.description}</p><p>Location: ${a.location||"N/A"}</p>`;
-      container.appendChild(div);
+      div.innerHTML = `<h3>${a.name}</h3><img src="${API_BASE}${a.image}" alt="${a.name}"><p>${a.description}</p>`;
+      list.appendChild(div);
     });
-  } catch(err){ alert("Failed to load activities! " + err); }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load activities!");
+  }
 }
 
-// Upload forms
-document.getElementById('uploadPackageForm').addEventListener('submit', async function(e){
+// ✅ Upload Forms
+document.getElementById("uploadPackageForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
-  const formData = new FormData(this);
-  const res = await fetch(`${API_BASE}/api/packages`, { method:"POST", headers:{ Authorization:`Bearer ${token}` }, body:formData });
-  if(res.ok){ alert("Package uploaded!"); this.reset(); loadPackages(); } else { alert("Upload failed!"); }
+  const data = new FormData(e.target);
+  const res = await fetch(`${API_BASE}/api/packages`, { method:"POST", headers:{ Authorization:`Bearer ${token}` }, body:data });
+  if(res.ok){ alert("✅ Package uploaded!"); e.target.reset(); loadPackages(); } 
+  else alert("❌ Upload failed!");
 });
 
-document.getElementById('uploadActivityForm').addEventListener('submit', async function(e){
+document.getElementById("uploadActivityForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
-  const formData = new FormData(this);
-  const res = await fetch(`${API_BASE}/api/activities`, { method:"POST", headers:{ Authorization:`Bearer ${token}` }, body:formData });
-  if(res.ok){ alert("Activity uploaded!"); this.reset(); loadActivities(); } else { alert("Upload failed!"); }
+  const data = new FormData(e.target);
+  const res = await fetch(`${API_BASE}/api/activities`, { method:"POST", headers:{ Authorization:`Bearer ${token}` }, body:data });
+  if(res.ok){ alert("✅ Activity uploaded!"); e.target.reset(); loadActivities(); } 
+  else alert("❌ Upload failed!");
 });
 
-// Logout
+// ✅ Logout
 function logout(){
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
-  localStorage.removeItem("user");
+  localStorage.clear();
   window.location.href = "admin-login.html";
 }
 
-// Initial load
+// ✅ Initial load
 loadBookings();
 loadPackages();
 loadActivities();

@@ -35,7 +35,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      console.warn("⚠️  Blocked by CORS:", origin);
+      console.warn("⚠️ Blocked by CORS:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -44,7 +44,13 @@ app.use(
 );
 
 // ✅ Ensure uploads folders exist
-["uploads", "uploads/packages", "uploads/bookings", "uploads/profiles"].forEach((dir) => {
+[
+  "uploads",
+  "uploads/packages",
+  "uploads/bookings",
+  "uploads/profiles",
+  "uploads/activities"
+].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
     console.log(`📂 Created folder: ${dir}`);
@@ -72,7 +78,7 @@ fs.readdirSync(routesPath).forEach((file) => {
   }
 });
 
-// ✅ Only handle frontend routes, not /api calls
+// ✅ Serve frontend ONLY for non-API routes
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
@@ -97,6 +103,7 @@ sequelize
     });
   })
   .catch((err) => console.error("❌ Database connection error:", err));
+
 
 
 
