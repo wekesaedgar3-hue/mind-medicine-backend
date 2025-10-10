@@ -104,7 +104,7 @@
       width: 300px;
       text-align: center;
     }
-    input, select {
+    input {
       width: 100%;
       padding: 8px;
       margin: 8px 0;
@@ -168,6 +168,8 @@
   <script>
     const API_BASE = "https://mindandmedicineholidays.onrender.com/api";
     const session = JSON.parse(localStorage.getItem("session"));
+    let currentUser = null;
+    let selectedPackageId = null;
 
     if (!session || !session.token) {
       alert("Session expired. Please log in again.");
@@ -179,12 +181,13 @@
       Authorization: `Bearer ${session.token}`,
     };
 
-    // Load user profile
+    // ✅ Load user profile
     async function loadProfile() {
       try {
         const res = await fetch(`${API_BASE}/auth/me`, { headers });
         const user = await res.json();
         if (!res.ok) throw new Error();
+        currentUser = user;
         document.getElementById("userName").textContent = user.fullName || user.name || "N/A";
         document.getElementById("userEmail").textContent = user.email || "N/A";
         if (user.profilePicture) {
@@ -197,7 +200,7 @@
       }
     }
 
-    // Load packages
+    // ✅ Load packages
     async function loadPackages() {
       const grid = document.getElementById("packagesGrid");
       try {
@@ -218,7 +221,7 @@
       }
     }
 
-    // Load activities
+    // ✅ Load activities
     async function loadActivities() {
       const grid = document.getElementById("activitiesGrid");
       try {
@@ -238,18 +241,18 @@
       }
     }
 
-    // Load bookings
+    // ✅ Load bookings (use /my-bookings)
     async function loadBookings() {
       const body = document.getElementById("bookingsBody");
       try {
-        const res = await fetch(`${API_BASE}/bookings`, { headers });
+        const res = await fetch(`${API_BASE}/bookings/my-bookings`, { headers });
         const data = await res.json();
         if (!Array.isArray(data)) throw new Error();
         body.innerHTML = data.length
           ? data.map(b => `
               <tr>
                 <td>${b.Package?.title || "—"}</td>
-                <td>${new Date(b.createdAt).toLocaleDateString()}</td>
+                <td>${new Date(b.date || b.createdAt).toLocaleDateString()}</td>
                 <td>${b.status || "Pending"}</td>
               </tr>`).join("")
           : `<tr><td colspan="3">No bookings yet.</td></tr>`;
@@ -258,8 +261,7 @@
       }
     }
 
-    // Booking modal logic
-    let selectedPackageId = null;
+    // ✅ Booking modal
     function openBookingModal(id, name) {
       selectedPackageId = id;
       document.getElementById("modalPackageName").textContent = name;
@@ -269,23 +271,29 @@
       document.getElementById("bookingModal").style.display = "none";
     }
 
+    // ✅ Confirm booking
     document.getElementById("confirmBookingBtn").addEventListener("click", async () => {
       const date = document.getElementById("bookingDate").value;
       if (!date) return alert("Please select a booking date.");
+      if (!currentUser) return alert("User not loaded. Please refresh.");
 
       try {
         const res = await fetch(`${API_BASE}/bookings`, {
           method: "POST",
           headers,
-          body: JSON.stringify({ packageId: selectedPackageId, date }),
+          body: JSON.stringify({
+            userId: currentUser.id,
+            packageId: selectedPackageId,
+            date,
+          }),
         });
         if (!res.ok) throw new Error("Booking failed");
-        alert("Booking successful!");
+        alert("✅ Booking successful!");
         closeModal();
         loadBookings();
       } catch (err) {
         console.error(err);
-        alert("Failed to book package.");
+        alert("❌ Failed to book package.");
       }
     });
 
@@ -296,11 +304,12 @@
 
     document.getElementById("logoutBtn").addEventListener("click", logout);
 
-    // Initialize dashboard
-    loadProfile();
-    loadPackages();
-    loadActivities();
-    loadBookings();
+    // ✅ Initialize
+    loadProfile().then(() => {
+      loadPackages();
+      loadActivities();
+      loadBookings();
+    });
   </script>
 </body>
 </html>

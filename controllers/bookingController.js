@@ -4,17 +4,24 @@ const Package = require("../models/Package");
 
 const getBaseUrl = (req) => `${req.protocol}://${req.get("host")}`;
 
-// Create booking
+// ✅ Create booking
 exports.createBooking = async (req, res) => {
   try {
-    const { userId, packageId, activities, status } = req.body;
-    const receipt = req.file ? `/uploads/bookings/${req.file.filename}` : null;
+    const { packageId, date } = req.body;
+    if (!packageId || !date) {
+      return res.status(400).json({ message: "Package and date are required" });
+    }
 
-    const booking = await Booking.create({ userId, packageId, activities: activities ? JSON.stringify(activities) : null, status, receipt });
+    const booking = await Booking.create({
+      userId: req.user.id, // ✅ Always the logged-in user
+      packageId,
+      date,
+      status: "Pending",
+    });
 
     res.status(201).json({
       message: "Booking created",
-      booking: { ...booking.toJSON(), receipt: receipt ? `${getBaseUrl(req)}${receipt}` : null },
+      booking,
     });
   } catch (err) {
     console.error("Error creating booking:", err);
@@ -22,7 +29,7 @@ exports.createBooking = async (req, res) => {
   }
 };
 
-// Get all bookings (admin)
+// ✅ Admin: Get all bookings
 exports.getBookings = async (req, res) => {
   try {
     const bookings = await Booking.findAll({
@@ -30,26 +37,31 @@ exports.getBookings = async (req, res) => {
         { model: User, attributes: ["id", "fullName", "email"] },
         { model: Package, attributes: ["id", "title", "price"] },
       ],
+      order: [["createdAt", "DESC"]],
     });
-
-    const baseUrl = getBaseUrl(req);
-    const formatted = bookings.map((b) => ({
-      id: b.id,
-      user: b.User ? { id: b.User.id, fullName: b.User.fullName, email: b.User.email } : null,
-      package: b.Package ? { id: b.Package.id, title: b.Package.title, price: b.Package.price } : null,
-      activities: b.activities ? JSON.parse(b.activities) : [],
-      status: b.status,
-      receipt: b.receipt ? `${baseUrl}${b.receipt}` : null,
-    }));
-
-    res.json(formatted);
+    res.json(bookings);
   } catch (err) {
     console.error("Error fetching bookings:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Get booking by ID
+// ✅ User: Get their own bookings
+exports.getUserBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.findAll({
+      where: { userId: req.user.id },
+      include: [{ model: Package, attributes: ["id", "title", "price"] }],
+      order: [["createdAt", "DESC"]],
+    });
+    res.json(bookings);
+  } catch (err) {
+    console.error("Error fetching user bookings:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ✅ Get booking by ID
 exports.getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findByPk(req.params.id, {
@@ -60,22 +72,14 @@ exports.getBookingById = async (req, res) => {
     });
 
     if (!booking) return res.status(404).json({ message: "Booking not found" });
-
-    res.json({
-      id: booking.id,
-      user: booking.User ? { id: booking.User.id, fullName: booking.User.fullName, email: booking.User.email } : null,
-      package: booking.Package ? { id: booking.Package.id, title: booking.Package.title, price: booking.Package.price } : null,
-      activities: booking.activities ? JSON.parse(booking.activities) : [],
-      status: booking.status,
-      receipt: booking.receipt ? `${getBaseUrl(req)}${booking.receipt}` : null,
-    });
+    res.json(booking);
   } catch (err) {
     console.error("Error fetching booking:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Delete booking (admin)
+// ✅ Delete booking (admin)
 exports.deleteBooking = async (req, res) => {
   try {
     const deleted = await Booking.destroy({ where: { id: req.params.id } });
@@ -87,7 +91,7 @@ exports.deleteBooking = async (req, res) => {
   }
 };
 
-// Upload receipt
+// ✅ Upload receipt (optional)
 exports.uploadReceipt = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
@@ -98,10 +102,14 @@ exports.uploadReceipt = async (req, res) => {
     booking.receipt = `/uploads/bookings/${req.file.filename}`;
     await booking.save();
 
-    res.json({ message: "Receipt uploaded", receipt: `${getBaseUrl(req)}${booking.receipt}` });
+    res.json({
+      message: "Receipt uploaded",
+      receipt: `${getBaseUrl(req)}${booking.receipt}`,
+    });
   } catch (err) {
     console.error("Error uploading receipt:", err);
     res.status(500).json({ error: err.message });
   }
 };
+
 
