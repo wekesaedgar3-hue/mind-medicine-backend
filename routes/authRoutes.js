@@ -4,8 +4,9 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const authController = require("../controllers/authController");
+const { authenticate } = require("../middleware/authMiddleware");
 
-// ✅ Multer Setup for Profile Pics
+// ✅ Multer setup for profile pictures
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/profiles/");
@@ -17,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -27,11 +28,29 @@ const upload = multer({
   },
 });
 
-// ✅ Routes
+// ✅ Public routes
 router.post("/register", upload.single("profilePic"), authController.register);
 router.post("/login", authController.login);
 
+// ✅ Authenticated route (to verify current session)
+router.get("/me", authenticate, async (req, res) => {
+  try {
+    const user = req.user;
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      profilePicture: user.profilePicture || null,
+    });
+  } catch (err) {
+    console.error("Error in /me route:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
+
 
 
 
