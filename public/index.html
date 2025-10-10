@@ -148,11 +148,14 @@ footer a:hover{text-decoration:underline;}
   <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1496449903678-68ddcb189a24?auto=format&fit=crop&w=1400&q=80');"></div>
   <div class="dots"></div>
   <div id="hamburger" class="hamburger"><span></span><span></span><span></span></div>
+
+  <!-- ✅ Navigation Menu Always Visible -->
   <nav id="navMenu" class="nav-menu">
     <img src="images/logo2.png" alt="Sidebar Logo">
-    <a href="register.html" id="openRegisterMenu">Register</a>
-    <a href="login.html" id="openUserLoginMenu">User Login</a>
-    <a href="#" id="openAdminLoginMenu">Admin Login</a>
+    <a href="index.html">Home</a>
+    <a href="register.html" id="registerLink">Register</a>
+    <a href="login.html" id="loginLink">User Login</a>
+    <a href="admin-login.html" id="adminLoginLink">Admin Login</a>
     <a href="#core-services">Core Services</a>
     <a href="#medical-tourism">Medical Tourism</a>
     <a href="#additional-services">Additional Services</a>
@@ -244,59 +247,49 @@ footer a:hover{text-decoration:underline;}
 </footer>
 
 <script>
+// Hamburger menu
 const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('navMenu');
 
-hamburger.addEventListener('click', () => {
-  navMenu.classList.toggle('active');
+hamburger.addEventListener('click', () => navMenu.classList.toggle('active'));
+document.addEventListener('click', e => {
+  if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) navMenu.classList.remove('active');
 });
 
-document.addEventListener('click', (e) => {
-  if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
-    navMenu.classList.remove('active');
-  }
-});
-
-const heroSlides=document.querySelectorAll(".hero-slide");
-const dotsContainer=document.querySelector(".dots");
-let heroIndex=0;
-heroSlides.forEach((_,i)=>{
-  const dot=document.createElement("div");
+// Hero slider
+const heroSlides = document.querySelectorAll(".hero-slide");
+const dotsContainer = document.querySelector(".dots");
+let heroIndex = 0;
+heroSlides.forEach((_, i) => {
+  const dot = document.createElement("div");
   dot.classList.add("dot");
-  if(i===0)dot.classList.add("active");
-  dot.addEventListener("click",()=>showHero(i));
+  if (i === 0) dot.classList.add("active");
+  dot.addEventListener("click", () => showHero(i));
   dotsContainer.appendChild(dot);
 });
-const dots=document.querySelectorAll(".dot");
-function showHero(i){
-  heroSlides.forEach(s=>s.classList.remove("active"));
-  dots.forEach(d=>d.classList.remove("active"));
+const dots = document.querySelectorAll(".dot");
+function showHero(i) {
+  heroSlides.forEach(s => s.classList.remove("active"));
+  dots.forEach(d => d.classList.remove("active"));
   heroSlides[i].classList.add("active");
   dots[i].classList.add("active");
-  heroIndex=i;
+  heroIndex = i;
 }
-function autoHero(){
-  heroIndex=(heroIndex+1)%heroSlides.length;
+function autoHero() {
+  heroIndex = (heroIndex + 1) % heroSlides.length;
   showHero(heroIndex);
 }
-setInterval(autoHero,6000);
+setInterval(autoHero, 6000);
 
 // ===== User login detection =====
 const user = JSON.parse(localStorage.getItem("mmh_user"));
-const registerLink = document.getElementById("openRegisterMenu");
-const loginLink = document.getElementById("openUserLoginMenu");
 const logoutBtn = document.getElementById("logoutBtn");
 
-if(user){
-  registerLink.style.display = "none";
-  loginLink.style.display = "none";
-
+if (user) {
   const welcome = document.createElement("a");
   welcome.textContent = `Hello, ${user.fullName}`;
   welcome.style.color = "#ffcc00";
-  welcome.style.marginTop = "10px";
   navMenu.insertBefore(welcome, logoutBtn);
-  
   logoutBtn.style.display = "block";
 }
 
@@ -307,3 +300,4 @@ logoutBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
