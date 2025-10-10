@@ -66,10 +66,8 @@
   </div>
 
   <script>
-    // ✅ Detect backend automatically
-    const API_BASE = window.location.hostname === "localhost"
-      ? "http://localhost:5000"
-      : "https://mind-medicine-backend.onrender.com"; // change if different
+    // ✅ Empty base uses same domain (backend + frontend together)
+    const API_BASE = "";
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -99,7 +97,7 @@
           alert(`❌ ${data.message || "Invalid credentials"}`);
         }
       } catch (err) {
-        alert("⚠️ Unable to connect to server. Please try again later.");
+        alert("⚠️ Unable to connect to backend.");
       }
     });
   </script>
