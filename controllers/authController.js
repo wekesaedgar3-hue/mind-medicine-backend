@@ -1,4 +1,3 @@
-// controllers/authController.js
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
@@ -43,7 +42,7 @@ exports.register = async (req, res) => {
         id: user.id,
         fullName: user.fullName,
         email: user.email,
-        role: user.role,
+        role: user.role.toLowerCase(), // normalize role
         profilePicture: user.profilePicture,
       },
     });
@@ -76,7 +75,7 @@ exports.login = async (req, res) => {
         id: user.id,
         fullName: user.fullName,
         email: user.email,
-        role: user.role,
+        role: user.role.toLowerCase(), // normalize role
         profilePicture: user.profilePicture,
       },
     });
@@ -98,8 +97,6 @@ exports.getMe = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
 
 
 

@@ -77,7 +77,8 @@
 const API_BASE = "https://mindandmedicineholidays.onrender.com/api";
 const session = JSON.parse(localStorage.getItem("session"));
 
-if (!session || !session.token || session.role !== "admin") {
+// ✅ Session & role check
+if (!session || !session.token || session.user?.role !== "admin") {
   alert("You must be logged in as an admin!");
   window.location.href = "admin-login.html";
 }
@@ -91,7 +92,7 @@ function showSection(id) {
   if (id === "activitiesSection") loadActivities();
 }
 
-// ✅ Load Bookings
+// Load Bookings
 async function loadBookings() {
   const list = document.getElementById("bookingsList");
   list.textContent = "Loading...";
@@ -119,7 +120,7 @@ async function loadBookings() {
   }
 }
 
-// ✅ Load Packages
+// Load Packages
 async function loadPackages() {
   const list = document.getElementById("packagesList");
   list.textContent = "Loading...";
@@ -146,7 +147,7 @@ async function loadPackages() {
   }
 }
 
-// ✅ Load Activities
+// Load Activities
 async function loadActivities() {
   const list = document.getElementById("activitiesList");
   list.textContent = "Loading...";
@@ -172,7 +173,7 @@ async function loadActivities() {
   }
 }
 
-// ✅ Upload Package
+// Upload Package
 document.getElementById("uploadPackageForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = new FormData(e.target);
@@ -192,7 +193,7 @@ document.getElementById("uploadPackageForm").addEventListener("submit", async (e
   }
 });
 
-// ✅ Upload Activity
+// Upload Activity
 document.getElementById("uploadActivityForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = new FormData(e.target);

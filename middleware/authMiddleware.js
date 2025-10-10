@@ -1,4 +1,3 @@
-// middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
@@ -28,8 +27,8 @@ exports.authenticate = async (req, res, next) => {
 };
 
 exports.isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === "admin") return next();
-  return res.status(403).json({ message: "Access denied, admin only" });
+  if (req.user && req.user.role.toLowerCase() === "admin") return next();
+  return res.status(403).json({ message: "You must be logged in as an admin!" });
 };
 
 

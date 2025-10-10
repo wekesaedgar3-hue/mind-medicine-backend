@@ -65,7 +65,7 @@
     </p>
   </div>
 
-  <!-- ✅ Corrected login script -->
+  <!-- ✅ Login script -->
   <script>
   const backendUrl = "https://mindandmedicineholidays.onrender.com";
 
@@ -87,14 +87,10 @@
       console.log("🔐 Login Response:", data);
 
       if (res.ok && data.token && data.user) {
-        // ✅ Normalize role to lowercase for consistent checks
-        const role = (data.user.role || '').toLowerCase();
-
-        // ✅ Store session
+        data.user.role = (data.user.role || '').toLowerCase(); // normalize role
         localStorage.setItem("session", JSON.stringify({ token: data.token, user: data.user }));
 
-        // ✅ Redirect based on role
-        if (role === "admin") {
+        if (data.user.role === "admin") {
           window.location.href = "admin-dashboard.html";
         } else {
           window.location.href = "user-dashboard.html";
@@ -111,6 +107,7 @@
   </script>
 </body>
 </html>
+
 
 
 

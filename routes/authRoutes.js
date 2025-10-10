@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const authController = require("../controllers/authController");
-const { authenticate } = require("../middleware/authMiddleware");
+const { authenticate, isAdmin } = require("../middleware/authMiddleware");
 
 // ✅ Multer setup for profile pictures
 const storage = multer.diskStorage({
@@ -48,9 +48,12 @@ router.get("/me", authenticate, async (req, res) => {
   }
 });
 
+// ✅ Example admin route
+router.get("/admin-only", authenticate, isAdmin, (req, res) => {
+  res.json({ message: "Welcome, admin!" });
+});
+
 module.exports = router;
-
-
 
 
 
