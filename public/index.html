@@ -13,7 +13,6 @@ body{
   color:black;
   overflow-x:hidden;
 }
-/* ===== Header ===== */
 header{
   position:relative;
   width:100%;
@@ -83,12 +82,8 @@ header img.logo{
   transition:.3s;
 }
 .dot.active{background:#ffd700;opacity:1;}
-
-/* ===== Sections ===== */
 section{padding:60px 20px;max-width:1200px;margin:auto;}
 section h2{text-align:center;margin-bottom:30px;font-size:2.2rem;color:#006400;}
-
-/* ===== Service cards with images ===== */
 .service-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
@@ -112,8 +107,6 @@ section h2{text-align:center;margin-bottom:30px;font-size:2.2rem;color:#006400;}
 }
 .service-card .content h3{color:#006400;margin-bottom:10px;}
 .service-card .content p{font-size:.95rem;}
-
-/* ===== Gallery ===== */
 #gallery{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
@@ -126,8 +119,6 @@ section h2{text-align:center;margin-bottom:30px;font-size:2.2rem;color:#006400;}
   transition:transform .3s;
 }
 #gallery img:hover{transform:scale(1.05);}
-
-/* ===== Footer ===== */
 footer{
   background:#006400;
   color:#fff;text-align:center;
@@ -139,8 +130,6 @@ footer img{
 }
 footer a{color:#90ee90;text-decoration:none;}
 footer a:hover{text-decoration:underline;}
-
-/* ===== Buttons ===== */
 .btn{
   background:#006400;color:#fff;
   padding:10px 20px;border:none;
@@ -161,8 +150,8 @@ footer a:hover{text-decoration:underline;}
   <div id="hamburger" class="hamburger"><span></span><span></span><span></span></div>
   <nav id="navMenu" class="nav-menu">
     <img src="images/logo2.png" alt="Sidebar Logo">
-    <a href="#" id="openRegisterMenu">Register</a>
-    <a href="#" id="openUserLoginMenu">User Login</a>
+    <a href="register.html" id="openRegisterMenu">Register</a>
+    <a href="login.html" id="openUserLoginMenu">User Login</a>
     <a href="#" id="openAdminLoginMenu">Admin Login</a>
     <a href="#core-services">Core Services</a>
     <a href="#medical-tourism">Medical Tourism</a>
@@ -170,6 +159,7 @@ footer a:hover{text-decoration:underline;}
     <a href="#gallery">Gallery</a>
     <a href="#about-us">About Us</a>
     <a href="#contact">Contact</a>
+    <a href="#" id="logoutBtn" style="display:none;color:#ffcc00;">Logout</a>
   </nav>
 </header>
 
@@ -254,7 +244,6 @@ footer a:hover{text-decoration:underline;}
 </footer>
 
 <script>
-// ===== Mobile Nav (open/close smoothly) =====
 const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('navMenu');
 
@@ -262,14 +251,12 @@ hamburger.addEventListener('click', () => {
   navMenu.classList.toggle('active');
 });
 
-// Close menu when clicking outside (optional smooth UX)
 document.addEventListener('click', (e) => {
   if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
     navMenu.classList.remove('active');
   }
 });
 
-// ===== Hero auto slider =====
 const heroSlides=document.querySelectorAll(".hero-slide");
 const dotsContainer=document.querySelector(".dots");
 let heroIndex=0;
@@ -294,10 +281,28 @@ function autoHero(){
 }
 setInterval(autoHero,6000);
 
-// ===== Placeholder backend alerts =====
-["openRegisterMenu","openUserLoginMenu","openAdminLoginMenu"].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el)el.addEventListener("click",()=>alert("Feature coming soon!"));
+// ===== User login detection =====
+const user = JSON.parse(localStorage.getItem("mmh_user"));
+const registerLink = document.getElementById("openRegisterMenu");
+const loginLink = document.getElementById("openUserLoginMenu");
+const logoutBtn = document.getElementById("logoutBtn");
+
+if(user){
+  registerLink.style.display = "none";
+  loginLink.style.display = "none";
+
+  const welcome = document.createElement("a");
+  welcome.textContent = `Hello, ${user.fullName}`;
+  welcome.style.color = "#ffcc00";
+  welcome.style.marginTop = "10px";
+  navMenu.insertBefore(welcome, logoutBtn);
+  
+  logoutBtn.style.display = "block";
+}
+
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("mmh_user");
+  location.reload();
 });
 </script>
 </body>
