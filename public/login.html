@@ -84,35 +84,45 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })
         });
-        const data = await res.json();
 
-        if (res.ok) {
+        const data = await res.json();
+        console.log("🔐 Login Response:", data);
+
+        if (res.ok && data.token) {
           alert("✅ Login successful!");
 
-          // ✅ Save session in one consistent format
+          // ✅ Always store in same format expected by dashboard
           localStorage.setItem("user_session", JSON.stringify({
             token: data.token,
-            role: data.role || data.user?.role || "user"
+            role: data.user?.role || data.role || "user",
+            user: {
+              id: data.user?.id,
+              name: data.user?.name,
+              email: data.user?.email
+            }
           }));
 
-          // ✅ Redirect based on role
-          if (data.role === "admin" || data.user?.role === "admin") {
+          // ✅ Redirect by role
+          const role = data.user?.role || data.role || "user";
+          if (role === "admin") {
             window.location.href = "admin-dashboard.html";
           } else {
             window.location.href = "user-dashboard.html";
           }
+
         } else {
           alert(`❌ ${data.message || "Invalid credentials."}`);
         }
 
       } catch (err) {
-        console.error(err);
+        console.error("❌ Login error:", err);
         alert("⚠️ Unable to connect to backend.");
       }
     });
   </script>
 </body>
 </html>
+
 
 
 
