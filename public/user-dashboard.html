@@ -9,6 +9,7 @@
     header { background: #1b4332; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
     header h1 { margin: 0; font-size: 1.2rem; }
     button { background: #e63946; border: none; padding: 8px 14px; border-radius: 5px; color: #fff; cursor: pointer; }
+    button:hover { opacity: 0.9; }
     .container { max-width: 1000px; margin: 2rem auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; }
     h2 { color: #1b4332; border-bottom: 2px solid #81c784; padding-bottom: 0.5rem; margin-top: 2rem; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
@@ -72,149 +73,140 @@
     </div>
   </div>
 
+  <!-- ✅ Full Dashboard Script -->
   <script>
-    const API_BASE = "https://mindandmedicineholidays.onrender.com/api";
-    const session = JSON.parse(localStorage.getItem("session"));
-    let currentUser = session?.user || null;
-    let selectedPackageId = null;
+  const API_BASE = "https://mindandmedicineholidays.onrender.com/api";
+  const session = JSON.parse(localStorage.getItem("session"));
+  let currentUser = session?.user || null;
 
-    if (!session || !session.token) {
-      alert("Session expired. Please log in again.");
-      window.location.href = "login.html";
+  if (!session || !session.token) {
+    alert("Session expired. Please log in again.");
+    window.location.href = "login.html";
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session.token}`,
+  };
+
+  // ✅ Load profile
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, { headers });
+      if (res.ok) currentUser = await res.json();
+    } catch (err) {
+      console.warn("Falling back to session user:", err);
     }
 
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${session.token}`,
-    };
+    document.getElementById("userName").textContent = currentUser.fullName || "N/A";
+    document.getElementById("userEmail").textContent = currentUser.email || "N/A";
+    document.getElementById("profilePic").src = currentUser.profilePicture 
+      ? `${API_BASE.replace("/api","")}/${currentUser.profilePicture}` 
+      : "uploads/profiles/default.png";
+  }
 
-    // ✅ Load user profile
-    async function loadProfile() {
-      try {
-        const res = await fetch(`${API_BASE}/auth/me`, { headers });
-        if (!res.ok) throw new Error("Auth failed");
-        const user = await res.json();
-        currentUser = user;
-      } catch (err) {
-        console.warn("Falling back to session user:", err);
-      }
-
-      if (currentUser) {
-        document.getElementById("userName").textContent = currentUser.fullName || currentUser.name || "N/A";
-        document.getElementById("userEmail").textContent = currentUser.email || "N/A";
-      } else {
-        document.getElementById("userName").textContent = "N/A";
-        document.getElementById("userEmail").textContent = "N/A";
-      }
+  // ✅ Load packages
+  async function loadPackages() {
+    const grid = document.getElementById("packagesGrid");
+    try {
+      const res = await fetch(`${API_BASE}/packages`);
+      const data = await res.json();
+      grid.innerHTML = data.length
+        ? data.map(p => `
+          <div class="card">
+            <img src="${API_BASE.replace("/api","")}/${p.image || "uploads/default.jpg"}" alt="${p.title}" />
+            <h4>${p.title}</h4>
+            <p>${p.description || ""}</p>
+            <button onclick="openBookingModal('${p.id}','${p.title}')">Book Now</button>
+          </div>`).join("")
+        : "<p>No packages available.</p>";
+    } catch {
+      grid.innerHTML = "<p>Error loading packages.</p>";
     }
+  }
 
-    // ✅ Load packages
-    async function loadPackages() {
-      const grid = document.getElementById("packagesGrid");
-      try {
-        const res = await fetch(`${API_BASE}/packages`);
-        const data = await res.json();
-        grid.innerHTML = data.length
-          ? data.map(p => `
-              <div class="card">
-                <img src="${API_BASE.replace("/api","")}/${p.image || "uploads/default.jpg"}" alt="${p.title}" />
-                <h4>${p.title}</h4>
-                <p>${p.description || ""}</p>
-                <button onclick="openBookingModal('${p.id}','${p.title}')">Book Now</button>
-              </div>`).join("")
-          : "<p>No packages available.</p>";
-      } catch {
-        grid.innerHTML = "<p>Error loading packages.</p>";
-      }
+  // ✅ Load activities
+  async function loadActivities() {
+    const grid = document.getElementById("activitiesGrid");
+    try {
+      const res = await fetch(`${API_BASE}/activities`);
+      const data = await res.json();
+      grid.innerHTML = data.length
+        ? data.map(a => `
+          <div class="card">
+            <img src="${API_BASE.replace("/api","")}/${a.image || "uploads/default.jpg"}" alt="${a.name}" />
+            <h4>${a.name}</h4>
+            <p>${a.description || ""}</p>
+          </div>`).join("")
+        : "<p>No activities available.</p>";
+    } catch {
+      grid.innerHTML = "<p>Error loading activities.</p>";
     }
+  }
 
-    // ✅ Load activities
-    async function loadActivities() {
-      const grid = document.getElementById("activitiesGrid");
-      try {
-        const res = await fetch(`${API_BASE}/activities`);
-        const data = await res.json();
-        grid.innerHTML = data.length
-          ? data.map(a => `
-              <div class="card">
-                <img src="${API_BASE.replace("/api","")}/${a.image || "uploads/default.jpg"}" alt="${a.name}" />
-                <h4>${a.name}</h4>
-                <p>${a.description || ""}</p>
-              </div>`).join("")
-          : "<p>No activities available.</p>";
-      } catch {
-        grid.innerHTML = "<p>Error loading activities.</p>";
-      }
+  // ✅ Load bookings
+  async function loadBookings() {
+    const body = document.getElementById("bookingsBody");
+    try {
+      const res = await fetch(`${API_BASE}/bookings/my-bookings`, { headers });
+      const data = await res.json();
+      body.innerHTML = Array.isArray(data) && data.length
+        ? data.map(b => `
+          <tr>
+            <td>${b.Package?.title || "—"}</td>
+            <td>${new Date(b.date || b.createdAt).toLocaleDateString()}</td>
+            <td>${b.status || "Pending"}</td>
+          </tr>`).join("")
+        : `<tr><td colspan="3">No bookings yet.</td></tr>`;
+    } catch {
+      body.innerHTML = `<tr><td colspan="3">Error loading bookings.</td></tr>`;
     }
+  }
 
-    // ✅ Load bookings
-    async function loadBookings() {
-      const body = document.getElementById("bookingsBody");
-      try {
-        const res = await fetch(`${API_BASE}/bookings/my-bookings`, { headers });
-        const data = await res.json();
-        body.innerHTML = Array.isArray(data) && data.length
-          ? data.map(b => `
-              <tr>
-                <td>${b.Package?.title || "—"}</td>
-                <td>${new Date(b.date || b.createdAt).toLocaleDateString()}</td>
-                <td>${b.status || "Pending"}</td>
-              </tr>`).join("")
-          : `<tr><td colspan="3">No bookings yet.</td></tr>`;
-      } catch (err) {
-        console.error(err);
-        body.innerHTML = `<tr><td colspan="3">Error loading bookings.</td></tr>`;
-      }
-    }
+  // ✅ Booking modal
+  let selectedPackageId = null;
+  function openBookingModal(id, name) {
+    selectedPackageId = id;
+    document.getElementById("modalPackageName").textContent = name;
+    document.getElementById("bookingModal").style.display = "flex";
+  }
+  function closeModal() {
+    document.getElementById("bookingModal").style.display = "none";
+  }
 
-    // ✅ Booking modal
-    function openBookingModal(id, name) {
-      selectedPackageId = id;
-      document.getElementById("modalPackageName").textContent = name;
-      document.getElementById("bookingModal").style.display = "flex";
-    }
-    function closeModal() {
-      document.getElementById("bookingModal").style.display = "none";
-    }
+  // ✅ Confirm booking
+  document.getElementById("confirmBookingBtn").addEventListener("click", async () => {
+    const date = document.getElementById("bookingDate").value;
+    if (!date) return alert("Please select a booking date.");
+    if (!currentUser) return alert("User not loaded. Please refresh.");
 
-    // ✅ Confirm booking
-    document.getElementById("confirmBookingBtn").addEventListener("click", async () => {
-      const date = document.getElementById("bookingDate").value;
-      if (!date) return alert("Please select a booking date.");
-      if (!currentUser) return alert("User not loaded. Please refresh.");
-
-      try {
-        const res = await fetch(`${API_BASE}/bookings`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            userId: currentUser.id,
-            packageId: selectedPackageId,
-            date,
-          }),
-        });
-        if (!res.ok) throw new Error("Booking failed");
-        alert("✅ Booking successful!");
-        closeModal();
-        loadBookings();
-      } catch {
-        alert("❌ Failed to book package.");
-      }
-    });
-
-    function logout() {
-      localStorage.removeItem("session");
-      window.location.href = "login.html";
-    }
-
-    document.getElementById("logoutBtn").addEventListener("click", logout);
-
-    // ✅ Initialize dashboard
-    loadProfile().then(() => {
-      loadPackages();
-      loadActivities();
+    try {
+      const res = await fetch(`${API_BASE}/bookings`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ userId: currentUser.id, packageId: selectedPackageId, date }),
+      });
+      if (!res.ok) throw new Error("Booking failed");
+      alert("✅ Booking successful!");
+      closeModal();
       loadBookings();
-    });
+    } catch {
+      alert("❌ Failed to book package.");
+    }
+  });
+
+  function logout() {
+    localStorage.removeItem("session");
+    window.location.href = "login.html";
+  }
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+
+  // ✅ Initialize dashboard
+  loadProfile().then(() => {
+    loadPackages();
+    loadActivities();
+    loadBookings();
+  });
   </script>
 </body>
 </html>

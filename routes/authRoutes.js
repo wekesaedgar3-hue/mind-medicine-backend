@@ -1,4 +1,3 @@
-// routes/authRoutes.js
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -38,7 +37,7 @@ router.get("/me", authenticate, async (req, res) => {
     const user = req.user; // this comes from authenticate middleware
     res.json({
       id: user.id,
-      fullName: user.fullName,          // <-- use fullName
+      fullName: user.fullName,          // <-- now always returns fullName
       email: user.email,
       role: user.role,
       profilePicture: user.profilePicture || null,
@@ -50,9 +49,6 @@ router.get("/me", authenticate, async (req, res) => {
 });
 
 module.exports = router;
-
-
-
 
 
 
