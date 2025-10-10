@@ -23,7 +23,6 @@
     h2 {
       text-align: center;
       color: #2a4d69;
-      margin-bottom: 20px;
     }
     input, button {
       width: 100%;
@@ -67,14 +66,10 @@
   </div>
 
   <script>
-    // ✅ Automatically detect local or deployed backend
-    const backendUrl = window.location.hostname.includes("localhost")
-      ? "http://localhost:5000"
-      : "https://mindandmedicineholidays.onrender.com";
+    const backendUrl = "https://mindandmedicineholidays.onrender.com";
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
 
@@ -89,32 +84,27 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })
         });
-
         const data = await res.json();
 
-        if (res.ok && data.token) {
+        if (res.ok) {
           alert("✅ Login successful!");
 
-          // ✅ Save session correctly
-          localStorage.setItem(
-            "session",
-            JSON.stringify({
-              token: data.token,
-              role: data.role || data.user?.role || "user",
-            })
-          );
+          // ✅ Save session in one consistent format
+          localStorage.setItem("user_session", JSON.stringify({
+            token: data.token,
+            role: data.role || data.user?.role || "user"
+          }));
 
-          // ✅ Redirect user by role
-          const role = data.role || data.user?.role;
-          if (role === "admin") {
+          // ✅ Redirect based on role
+          if (data.role === "admin" || data.user?.role === "admin") {
             window.location.href = "admin-dashboard.html";
           } else {
             window.location.href = "user-dashboard.html";
           }
-
         } else {
           alert(`❌ ${data.message || "Invalid credentials."}`);
         }
+
       } catch (err) {
         console.error(err);
         alert("⚠️ Unable to connect to backend.");
@@ -123,6 +113,7 @@
   </script>
 </body>
 </html>
+
 
 
 

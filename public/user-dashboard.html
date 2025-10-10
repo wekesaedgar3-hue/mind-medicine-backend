@@ -113,7 +113,9 @@
   <script>
     const API_BASE = "https://mindandmedicineholidays.onrender.com";
 
-    const session = JSON.parse(localStorage.getItem("session"));
+    // ✅ Use correct key name
+    const session = JSON.parse(localStorage.getItem("user_session") || "null");
+
     if (!session || !session.token || session.role !== "user") {
       alert("Please log in first.");
       window.location.href = "login.html";
@@ -187,7 +189,7 @@
     }
 
     function logout() {
-      localStorage.removeItem("session");
+      localStorage.removeItem("user_session");
       window.location.href = "login.html";
     }
 
@@ -199,6 +201,7 @@
   </script>
 </body>
 </html>
+
 
 
 
