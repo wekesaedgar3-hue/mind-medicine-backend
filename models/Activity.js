@@ -1,3 +1,4 @@
+// models/Activity.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
@@ -30,4 +31,5 @@ const Activity = sequelize.define("Activity", {
 });
 
 module.exports = Activity;
+
 

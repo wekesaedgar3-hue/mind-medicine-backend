@@ -1,9 +1,8 @@
-// middleware/uploadBookings.js
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Storage for booking receipts
+// Storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const folder = "uploads/bookings/";
@@ -15,8 +14,9 @@ const storage = multer.diskStorage({
   },
 });
 
+// File type filter
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|pdf/; // allow PDF receipts too
+  const allowedTypes = /jpeg|jpg|png|pdf/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
 

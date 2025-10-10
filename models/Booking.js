@@ -1,9 +1,15 @@
+// models/Booking.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 const User = require("./User");
 const Package = require("./Package");
 
 const Booking = sequelize.define("Booking", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
   startDate: {
     type: DataTypes.DATE,
     allowNull: true,
@@ -13,7 +19,7 @@ const Booking = sequelize.define("Booking", {
     allowNull: true,
   },
   activities: {
-    type: DataTypes.TEXT, // stored as JSON string
+    type: DataTypes.JSONB, // ✅ use JSONB for structured activity data in PostgreSQL
     allowNull: true,
   },
   status: {
@@ -21,9 +27,15 @@ const Booking = sequelize.define("Booking", {
     defaultValue: "pending",
   },
   receipt: {
-    type: DataTypes.STRING, // ✅ file path to uploaded receipt
+    type: DataTypes.STRING, 
     allowNull: true,
+    comment: "Path to uploaded payment receipt",
   },
+}, {
+  tableName: "bookings",
+  timestamps: true,
+  createdAt: "created_at",
+  updatedAt: "updated_at"
 });
 
 // Associations
@@ -31,6 +43,7 @@ Booking.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
 Booking.belongsTo(Package, { foreignKey: "packageId", onDelete: "CASCADE" });
 
 module.exports = Booking;
+
 
 
 

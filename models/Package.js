@@ -1,7 +1,13 @@
+// models/Package.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
 const Package = sequelize.define("Package", {
+  id: { 
+    type: DataTypes.INTEGER, 
+    autoIncrement: true, 
+    primaryKey: true 
+  },
   title: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -15,13 +21,17 @@ const Package = sequelize.define("Package", {
     allowNull: false,
   },
   image: {
-    type: DataTypes.STRING, // ✅ store relative file path (e.g. /uploads/packages/file.jpg)
+    type: DataTypes.STRING, 
     allowNull: true,
+    comment: "Path to uploaded package image (e.g. /uploads/packages/file.jpg)"
   },
   category: {
-    type: DataTypes.STRING, // ✅ optional, for filtering categories
+    type: DataTypes.STRING, 
     allowNull: true,
-  },
+  }
+}, {
+  tableName: "packages",
+  timestamps: false
 });
 
 module.exports = Package;

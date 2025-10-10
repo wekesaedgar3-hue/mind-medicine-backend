@@ -1,9 +1,8 @@
-// middleware/uploadPackages.js
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Storage for package images
+// Storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const folder = "uploads/packages/";
@@ -15,6 +14,7 @@ const storage = multer.diskStorage({
   },
 });
 
+// File type filter
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -31,6 +31,7 @@ const upload = multer({
 });
 
 module.exports = upload;
+
 
 
 

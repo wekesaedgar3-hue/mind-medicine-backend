@@ -1,4 +1,4 @@
-// mind-medicine-backend/models/User.js
+// models/User.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
@@ -24,11 +24,12 @@ const User = sequelize.define("User", {
   },
   role: { 
     type: DataTypes.ENUM("user", "admin"), 
-    defaultValue: "user"   // <-- role column with default "user"
+    defaultValue: "user" 
   },
   profilePic: { 
     type: DataTypes.STRING, 
-    allowNull: true 
+    allowNull: true, 
+    comment: "Relative path to uploaded profile picture"
   }
 }, {
   tableName: "users",
@@ -36,6 +37,7 @@ const User = sequelize.define("User", {
 });
 
 module.exports = User;
+
 
 
 

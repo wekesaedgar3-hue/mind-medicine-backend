@@ -1,36 +1,26 @@
+// routes/activityRoutes.js
 const express = require("express");
-const Activity = require("../models/Activity");
-const upload = require("../middleware/uploadPackages"); // ✅ Multer middleware
-
 const router = express.Router();
+const activityController = require("../controllers/activityController");
+const upload = require("../middleware/uploadPackages"); // For activity images
+const { authenticate, isAdmin } = require("../middleware/authMiddleware");
 
-// ✅ Get all activities
-router.get("/", async (req, res) => {
+// ✅ Public: Get all activities
+router.get("/", activityController.getActivities);
+
+// ✅ Admin: Create activity (with optional image)
+router.post(
+  "/",
+  authenticate,
+  isAdmin,
+  upload.single("activityImage"),
+  activityController.createActivity
+);
+
+// ✅ Admin: Delete activity
+router.delete("/:id", authenticate, isAdmin, async (req, res) => {
   try {
-    const activities = await Activity.findAll();
-    res.json(activities);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ✅ Add activity (with optional image upload)
-router.post("/", upload.single("activityImage"), async (req, res) => {
-  try {
-    const { description } = req.body;
-    const image = req.file ? `/uploads/activities/${req.file.filename}` : null;
-
-    const newActivity = await Activity.create({ description, image });
-    res.status(201).json(newActivity);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ✅ Delete activity
-router.delete("/:id", async (req, res) => {
-  try {
-    const activity = await Activity.findByPk(req.params.id);
+    const activity = await require("../models/Activity").findByPk(req.params.id);
     if (!activity) return res.status(404).json({ message: "Activity not found" });
 
     await activity.destroy();
@@ -40,14 +30,21 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// ✅ Upload only activity image
-router.post("/upload-activity", upload.single("activityImage"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+// ✅ Admin: Upload activity image only
+router.post(
+  "/upload-activity",
+  authenticate,
+  isAdmin,
+  upload.single("activityImage"),
+  (req, res) => {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  res.json({
-    message: "Activity image uploaded successfully!",
-    filePath: `/uploads/activities/${req.file.filename}`,
-  });
-});
+    res.json({
+      message: "Activity image uploaded successfully!",
+      filePath: `/uploads/activities/${req.file.filename}`,
+    });
+  }
+);
 
 module.exports = router;
+

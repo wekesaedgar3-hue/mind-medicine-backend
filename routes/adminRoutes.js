@@ -1,8 +1,9 @@
+// routes/adminRoutes.js
 const express = require("express");
 const router = express.Router();
 const adminMiddleware = require("../middleware/adminMiddleware");
 
-// ✅ Example admin dashboard (requires admin)
+// ✅ Admin Dashboard Example
 router.get("/dashboard", adminMiddleware, (req, res) => {
   res.json({
     message: `Welcome Admin ${req.user.id} (${req.user.role})!`,
@@ -10,4 +11,5 @@ router.get("/dashboard", adminMiddleware, (req, res) => {
 });
 
 module.exports = router;
+
 

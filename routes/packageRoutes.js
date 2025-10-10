@@ -1,3 +1,4 @@
+// routes/packageRoutes.js
 const express = require("express");
 const router = express.Router();
 const packageController = require("../controllers/packageController");
@@ -10,7 +11,7 @@ router.get("/", packageController.getAllPackages);
 // ✅ Public: Get packages by category
 router.get("/category/:category", packageController.getPackagesByCategory);
 
-// ✅ Admin: Create a new package
+// ✅ Admin: Create package
 router.post(
   "/",
   adminMiddleware,
@@ -23,7 +24,7 @@ router.post(
   packageController.createPackage
 );
 
-// ✅ Admin: Update a package
+// ✅ Admin: Update package
 router.put(
   "/:id",
   adminMiddleware,
@@ -36,10 +37,11 @@ router.put(
   packageController.updatePackage
 );
 
-// ✅ Admin: Delete a package
+// ✅ Admin: Delete package
 router.delete("/:id", adminMiddleware, packageController.deletePackage);
 
 module.exports = router;
+
 
 
 

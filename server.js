@@ -19,20 +19,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS setup — allows local + deployed frontends
+// ✅ CORS setup
 const allowedOrigins = [
   "http://localhost:5000",
   "http://127.0.0.1:5500",
   "http://localhost:5500",
-  "https://mind-medicine-backend.onrender.com"
+  "https://mind-medicine-backend.onrender.com",
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
       console.warn("⚠️  Blocked by CORS:", origin);
       callback(new Error("Not allowed by CORS"));
     },
@@ -56,27 +54,22 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
 
-// ✅ Import models
-require("./models/User");
-require("./models/Package");
-require("./models/Activity");
-require("./models/Booking");
+// ✅ Import all models (important for associations)
+["User", "Package", "Activity", "Booking"].forEach((model) => require(`./models/${model}`));
 
-// ✅ Import routes
-const authRoutes = require("./routes/authRoutes");
-const packageRoutes = require("./routes/packageRoutes");
-const activityRoutes = require("./routes/activityRoutes");
-const bookingRoutes = require("./routes/bookingRoutes");
-const adminRoutes = require("./routes/adminRoutes");
+// ✅ Auto-load routes dynamically
+const routesPath = path.join(__dirname, "routes");
+fs.readdirSync(routesPath).forEach((file) => {
+  if (file.endsWith(".js")) {
+    const route = require(path.join(routesPath, file));
+    // Automatically prefix based on file name
+    const routeName = file.replace("Routes.js", "").toLowerCase();
+    app.use(`/api/${routeName}`, route);
+    console.log(`✅ Mounted /api/${routeName}`);
+  }
+});
 
-// ✅ Mount routes
-app.use("/api/auth", authRoutes);
-app.use("/api/packages", packageRoutes);
-app.use("/api/activities", activityRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/admin", adminRoutes);
-
-// ✅ Fallback route for SPA or static files (Express v5 safe)
+// ✅ Fallback route for SPA
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
@@ -101,6 +94,7 @@ sequelize
     });
   })
   .catch((err) => console.error("❌ DB connection error:", err));
+
 
 
 
