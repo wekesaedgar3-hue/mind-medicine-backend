@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>User Dashboard | Mind & Medicine Holidays</title>
   <style>
     body {
@@ -40,6 +40,7 @@
       color: #1b4332;
       border-bottom: 2px solid #81c784;
       padding-bottom: 0.5rem;
+      margin-top: 2rem;
     }
     table {
       width: 100%;
@@ -68,6 +69,48 @@
       object-fit: cover;
       border: 2px solid #1b4332;
     }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      background: #fafafa;
+    }
+    .card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      width: 300px;
+      text-align: center;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
@@ -88,26 +131,38 @@
       </div>
     </section>
 
+    <section class="packages-section">
+      <h2>Available Packages</h2>
+      <div class="grid" id="packagesGrid">Loading packages...</div>
+    </section>
+
+    <section class="activities-section">
+      <h2>Available Activities</h2>
+      <div class="grid" id="activitiesGrid">Loading activities...</div>
+    </section>
+
     <section class="bookings-section">
       <h2>Your Bookings</h2>
       <table>
         <thead>
-          <tr>
-            <th>Package</th>
-            <th>Date</th>
-            <th>Status</th>
-          </tr>
+          <tr><th>Package</th><th>Date</th><th>Status</th></tr>
         </thead>
         <tbody id="bookingsBody">
           <tr><td colspan="3">Loading...</td></tr>
         </tbody>
       </table>
     </section>
+  </div>
 
-    <section class="activities-section">
-      <h2>Recommended Activities</h2>
-      <ul id="activitiesList">Loading activities...</ul>
-    </section>
+  <!-- Booking Modal -->
+  <div class="modal" id="bookingModal">
+    <div class="modal-content">
+      <h3>Book Package</h3>
+      <p id="modalPackageName"></p>
+      <input type="date" id="bookingDate" required />
+      <button id="confirmBookingBtn">Confirm Booking</button>
+      <button onclick="closeModal()">Cancel</button>
+    </div>
   </div>
 
   <script>
@@ -121,24 +176,65 @@
 
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${session.token}`
+      Authorization: `Bearer ${session.token}`,
     };
 
     // Load user profile
     async function loadProfile() {
       try {
         const res = await fetch(`${API_BASE}/auth/me`, { headers });
-        if (!res.ok) throw new Error("Unauthorized");
         const user = await res.json();
+        if (!res.ok) throw new Error();
         document.getElementById("userName").textContent = user.fullName || user.name || "N/A";
         document.getElementById("userEmail").textContent = user.email || "N/A";
         if (user.profilePicture) {
-          document.getElementById("profilePic").src = `${API_BASE.replace("/api", "")}/${user.profilePicture}`;
+          document.getElementById("profilePic").src =
+            `${API_BASE.replace("/api", "")}/${user.profilePicture}`;
         }
-      } catch (err) {
-        console.error("Profile load error:", err);
+      } catch {
         alert("Session expired. Please log in again.");
         logout();
+      }
+    }
+
+    // Load packages
+    async function loadPackages() {
+      const grid = document.getElementById("packagesGrid");
+      try {
+        const res = await fetch(`${API_BASE}/packages`);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error();
+        grid.innerHTML = data.length
+          ? data.map(p => `
+              <div class="card">
+                <img src="${API_BASE.replace("/api","")}/${p.image || "uploads/default.jpg"}" alt="${p.title}" />
+                <h4>${p.title}</h4>
+                <p>${p.description || ""}</p>
+                <button onclick="openBookingModal('${p.id}','${p.title}')">Book Now</button>
+              </div>`).join("")
+          : "<p>No packages available.</p>";
+      } catch {
+        grid.innerHTML = "<p>Error loading packages.</p>";
+      }
+    }
+
+    // Load activities
+    async function loadActivities() {
+      const grid = document.getElementById("activitiesGrid");
+      try {
+        const res = await fetch(`${API_BASE}/activities`);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error();
+        grid.innerHTML = data.length
+          ? data.map(a => `
+              <div class="card">
+                <img src="${API_BASE.replace("/api","")}/${a.image || "uploads/default.jpg"}" alt="${a.name}" />
+                <h4>${a.name}</h4>
+                <p>${a.description || ""}</p>
+              </div>`).join("")
+          : "<p>No activities available.</p>";
+      } catch {
+        grid.innerHTML = "<p>Error loading activities.</p>";
       }
     }
 
@@ -148,42 +244,50 @@
       try {
         const res = await fetch(`${API_BASE}/bookings`, { headers });
         const data = await res.json();
-        if (!res.ok || !Array.isArray(data)) throw new Error();
-
-        if (data.length === 0) {
-          body.innerHTML = `<tr><td colspan="3">No bookings yet.</td></tr>`;
-          return;
-        }
-
-        body.innerHTML = data.map(b => `
-          <tr>
-            <td>${b.Package?.title || "—"}</td>
-            <td>${new Date(b.createdAt).toLocaleDateString()}</td>
-            <td>${b.status || "Pending"}</td>
-          </tr>
-        `).join("");
-      } catch (err) {
-        console.error("Booking load error:", err);
+        if (!Array.isArray(data)) throw new Error();
+        body.innerHTML = data.length
+          ? data.map(b => `
+              <tr>
+                <td>${b.Package?.title || "—"}</td>
+                <td>${new Date(b.createdAt).toLocaleDateString()}</td>
+                <td>${b.status || "Pending"}</td>
+              </tr>`).join("")
+          : `<tr><td colspan="3">No bookings yet.</td></tr>`;
+      } catch {
         body.innerHTML = `<tr><td colspan="3">Error loading bookings.</td></tr>`;
       }
     }
 
-    // Load activities
-    async function loadActivities() {
-      const list = document.getElementById("activitiesList");
-      try {
-        const res = await fetch(`${API_BASE}/activities`);
-        const activities = await res.json();
-        if (!res.ok || !Array.isArray(activities)) throw new Error();
-
-        list.innerHTML = activities.length
-          ? activities.map(a => `<li><strong>${a.name}</strong> — ${a.description || ""}</li>`).join("")
-          : `<li>No activities available.</li>`;
-      } catch (err) {
-        console.error("Activities load error:", err);
-        list.innerHTML = `<li>Error loading activities.</li>`;
-      }
+    // Booking modal logic
+    let selectedPackageId = null;
+    function openBookingModal(id, name) {
+      selectedPackageId = id;
+      document.getElementById("modalPackageName").textContent = name;
+      document.getElementById("bookingModal").style.display = "flex";
     }
+    function closeModal() {
+      document.getElementById("bookingModal").style.display = "none";
+    }
+
+    document.getElementById("confirmBookingBtn").addEventListener("click", async () => {
+      const date = document.getElementById("bookingDate").value;
+      if (!date) return alert("Please select a booking date.");
+
+      try {
+        const res = await fetch(`${API_BASE}/bookings`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ packageId: selectedPackageId, date }),
+        });
+        if (!res.ok) throw new Error("Booking failed");
+        alert("Booking successful!");
+        closeModal();
+        loadBookings();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to book package.");
+      }
+    });
 
     function logout() {
       localStorage.removeItem("session");
@@ -192,10 +296,11 @@
 
     document.getElementById("logoutBtn").addEventListener("click", logout);
 
-    // ✅ Initialize dashboard
+    // Initialize dashboard
     loadProfile();
-    loadBookings();
+    loadPackages();
     loadActivities();
+    loadBookings();
   </script>
 </body>
 </html>
