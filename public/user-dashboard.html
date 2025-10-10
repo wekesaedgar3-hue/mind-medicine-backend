@@ -111,62 +111,51 @@
   </div>
 
   <script>
-    const API_BASE = "https://mindandmedicineholidays.onrender.com";
+    const API_BASE = "https://mindandmedicineholidays.onrender.com/api";
+    const session = JSON.parse(localStorage.getItem("session"));
 
-    const sessionData = localStorage.getItem("user_session");
-    if (!sessionData) {
-      alert("Please log in first.");
-      window.location.href = "login.html";
-    }
-
-    const session = JSON.parse(sessionData);
-    const token = session?.token;
-
-    if (!token) {
-      alert("Invalid session. Please log in again.");
-      localStorage.removeItem("user_session");
+    if (!session || !session.token) {
+      alert("Session expired. Please log in again.");
       window.location.href = "login.html";
     }
 
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${session.token}`
     };
 
+    // Load user profile
     async function loadProfile() {
       try {
-        const res = await fetch(`${API_BASE}/api/auth/me`, { headers });
-        if (!res.ok) throw new Error("Invalid session or token expired.");
+        const res = await fetch(`${API_BASE}/auth/me`, { headers });
+        if (!res.ok) throw new Error("Unauthorized");
         const user = await res.json();
-        document.getElementById("userName").textContent = user.name || "N/A";
+        document.getElementById("userName").textContent = user.fullName || user.name || "N/A";
         document.getElementById("userEmail").textContent = user.email || "N/A";
         if (user.profilePicture) {
-          document.getElementById("profilePic").src = `${API_BASE}/${user.profilePicture}`;
+          document.getElementById("profilePic").src = `${API_BASE.replace("/api", "")}/${user.profilePicture}`;
         }
       } catch (err) {
-        console.error("Profile error:", err);
-        alert("⚠️ Session expired. Please log in again.");
+        console.error("Profile load error:", err);
+        alert("Session expired. Please log in again.");
         logout();
       }
     }
 
+    // Load bookings
     async function loadBookings() {
       const body = document.getElementById("bookingsBody");
       try {
-        const res = await fetch(`${API_BASE}/api/bookings`, { headers });
-        const bookings = await res.json();
+        const res = await fetch(`${API_BASE}/bookings`, { headers });
+        const data = await res.json();
+        if (!res.ok || !Array.isArray(data)) throw new Error();
 
-        if (!res.ok || !Array.isArray(bookings)) {
-          body.innerHTML = `<tr><td colspan="3">Error loading bookings.</td></tr>`;
-          return;
-        }
-
-        if (bookings.length === 0) {
+        if (data.length === 0) {
           body.innerHTML = `<tr><td colspan="3">No bookings yet.</td></tr>`;
           return;
         }
 
-        body.innerHTML = bookings.map(b => `
+        body.innerHTML = data.map(b => `
           <tr>
             <td>${b.Package?.title || "—"}</td>
             <td>${new Date(b.createdAt).toLocaleDateString()}</td>
@@ -174,38 +163,36 @@
           </tr>
         `).join("");
       } catch (err) {
-        console.error("Booking error:", err);
-        body.innerHTML = `<tr><td colspan="3">Error loading bookings</td></tr>`;
+        console.error("Booking load error:", err);
+        body.innerHTML = `<tr><td colspan="3">Error loading bookings.</td></tr>`;
       }
     }
 
+    // Load activities
     async function loadActivities() {
       const list = document.getElementById("activitiesList");
       try {
-        const res = await fetch(`${API_BASE}/api/activities`);
+        const res = await fetch(`${API_BASE}/activities`);
         const activities = await res.json();
-        if (!res.ok || !Array.isArray(activities)) {
-          list.innerHTML = `<li>Error loading activities.</li>`;
-          return;
-        }
+        if (!res.ok || !Array.isArray(activities)) throw new Error();
 
         list.innerHTML = activities.length
           ? activities.map(a => `<li><strong>${a.name}</strong> — ${a.description || ""}</li>`).join("")
           : `<li>No activities available.</li>`;
       } catch (err) {
-        console.error("Activity error:", err);
+        console.error("Activities load error:", err);
         list.innerHTML = `<li>Error loading activities.</li>`;
       }
     }
 
     function logout() {
-      localStorage.removeItem("user_session");
+      localStorage.removeItem("session");
       window.location.href = "login.html";
     }
 
     document.getElementById("logoutBtn").addEventListener("click", logout);
 
-    // ✅ Load everything safely
+    // ✅ Initialize dashboard
     loadProfile();
     loadBookings();
     loadActivities();
