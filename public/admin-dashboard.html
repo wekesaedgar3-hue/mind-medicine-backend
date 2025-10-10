@@ -92,7 +92,9 @@ function showSection(id) {
   if (id === "activitiesSection") loadActivities();
 }
 
+// ----------------------
 // Load Bookings
+// ----------------------
 async function loadBookings() {
   const list = document.getElementById("bookingsList");
   list.textContent = "Loading...";
@@ -102,25 +104,32 @@ async function loadBookings() {
     });
     if (!res.ok) throw new Error("Failed to fetch bookings");
     const bookings = await res.json();
+
+    console.log("Bookings data:", bookings); // ✅ Debug: check property names
+
     if (!Array.isArray(bookings) || !bookings.length) {
       list.innerHTML = "<p>No bookings yet.</p>";
       return;
     }
+
     list.innerHTML = bookings.map(b => `
       <div class="card">
-        <p><b>User:</b> ${b.User?.fullName || "N/A"} (${b.User?.email || "-"})</p>
-        <p><b>Package:</b> ${b.Package?.title || "N/A"}</p>
+        <p><b>User:</b> ${b.user?.fullName || "N/A"} (${b.user?.email || "-"})</p>
+        <p><b>Package:</b> ${b.package?.title || "N/A"}</p>
         <p><b>Status:</b> ${b.status || "Pending"}</p>
         <p><b>Date:</b> ${new Date(b.createdAt).toLocaleDateString()}</p>
       </div>
     `).join("");
+
   } catch (err) {
-    console.error(err);
+    console.error("Error loading bookings:", err);
     list.innerHTML = "<p>Failed to load bookings!</p>";
   }
 }
 
+// ----------------------
 // Load Packages
+// ----------------------
 async function loadPackages() {
   const list = document.getElementById("packagesList");
   list.textContent = "Loading...";
@@ -147,7 +156,9 @@ async function loadPackages() {
   }
 }
 
+// ----------------------
 // Load Activities
+// ----------------------
 async function loadActivities() {
   const list = document.getElementById("activitiesList");
   list.textContent = "Loading...";
@@ -173,7 +184,9 @@ async function loadActivities() {
   }
 }
 
+// ----------------------
 // Upload Package
+// ----------------------
 document.getElementById("uploadPackageForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = new FormData(e.target);
@@ -193,7 +206,9 @@ document.getElementById("uploadPackageForm").addEventListener("submit", async (e
   }
 });
 
+// ----------------------
 // Upload Activity
+// ----------------------
 document.getElementById("uploadActivityForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = new FormData(e.target);
@@ -218,7 +233,9 @@ function logout() {
   window.location.href = "admin-login.html";
 }
 
+// ----------------------
 // Initial loads
+// ----------------------
 loadBookings();
 loadPackages();
 loadActivities();
@@ -226,5 +243,4 @@ loadActivities();
 
 </body>
 </html>
-
 
