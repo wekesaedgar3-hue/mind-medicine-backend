@@ -1,10 +1,26 @@
+const fs = require("fs");
+const path = require("path");
 const Package = require("../models/Package");
 
+// ✅ Smart base URL resolver (works locally & on Render)
 const getBaseUrl = (req) => {
   if (process.env.RENDER_EXTERNAL_URL) {
     return process.env.RENDER_EXTERNAL_URL;
   }
   return `${req.protocol}://${req.get("host")}`;
+};
+
+// ✅ Helper to move uploaded file to /public/images/packages
+const moveToPublic = (file, folder) => {
+  if (!file) return null;
+  const publicDir = path.join(__dirname, "..", "public", "images", folder);
+  if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
+
+  const newPath = path.join(publicDir, file.filename);
+  fs.renameSync(file.path, newPath);
+
+  // Return the public path (for frontend access)
+  return `/images/${folder}/${file.filename}`;
 };
 
 // ✅ Get all packages (public)
@@ -34,10 +50,12 @@ exports.createPackage = async (req, res) => {
     if (!title || !price || !description)
       return res.status(400).json({ message: "Title, price, and description required" });
 
-    const image = req.file ? `/uploads/packages/${req.file.filename}` : null;
-    const newPackage = await Package.create({ title, price, description, category, image });
+    // Save uploaded file to /public/images/packages
+    const image = req.file ? moveToPublic(req.file, "packages") : null;
 
+    const newPackage = await Package.create({ title, price, description, category, image });
     const baseUrl = getBaseUrl(req);
+
     res.status(201).json({
       ...newPackage.toJSON(),
       image: image ? `${baseUrl}${image}` : null,
@@ -57,7 +75,7 @@ exports.updatePackage = async (req, res) => {
 
     const { title, price, description, category } = req.body;
     const image = req.file
-      ? `/uploads/packages/${req.file.filename}`
+      ? moveToPublic(req.file, "packages")
       : packageToUpdate.image;
 
     await packageToUpdate.update({ title, price, description, category, image });
@@ -87,8 +105,5 @@ exports.deletePackage = async (req, res) => {
     res.status(500).json({ message: err.message || "Failed to delete package" });
   }
 };
-
-
-
 
 
