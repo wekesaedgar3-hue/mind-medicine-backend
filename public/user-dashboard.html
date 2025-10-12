@@ -5,24 +5,161 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>User Dashboard | Mind & Medicine Holidays</title>
   <style>
-    body { font-family: "Segoe UI", Tahoma, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
-    header { background: #1b4332; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { margin: 0; font-size: 1.2rem; }
-    button { background: #e63946; border: none; padding: 8px 14px; border-radius: 5px; color: #fff; cursor: pointer; }
-    button:hover { opacity: 0.9; }
-    .container { max-width: 1000px; margin: 2rem auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; }
-    h2 { color: #1b4332; border-bottom: 2px solid #81c784; padding-bottom: 0.5rem; margin-top: 2rem; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    th { background: #1b4332; color: #fff; }
-    .profile { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-    .profile img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #1b4332; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; text-align: center; background: #fafafa; }
-    .card img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 0.5rem; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-    .modal-content { background: #fff; padding: 1.5rem; border-radius: 8px; width: 300px; text-align: center; }
-    input { width: 100%; padding: 8px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; }
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    header {
+      background: #1b4332;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    button {
+      background: #e63946;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+    }
+
+    h2 {
+      color: #1b4332;
+      border-bottom: 2px solid #81c784;
+      padding-bottom: 0.5rem;
+      margin-top: 2rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #1b4332;
+      color: #fff;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .profile img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #1b4332;
+    }
+
+    /* ✅ Improved grid & card layout for better photo display */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 1rem;
+      background: #fafafa;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 220px; /* Increased image height */
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 0.7rem;
+    }
+
+    .card h4 {
+      margin: 0.5rem 0;
+      color: #1b4332;
+      font-size: 1.1rem;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 600px) {
+      .card img {
+        height: 180px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -210,3 +347,4 @@
   </script>
 </body>
 </html>
+
