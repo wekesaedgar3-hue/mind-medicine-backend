@@ -26,19 +26,20 @@ const allowedOrigins = [
   "http://127.0.0.1:5500",
   "http://localhost:5000",
   "https://mind-medicine-backend.onrender.com",
-  "https://mindandmedicineholidays.onrender.com"
+  "https://mindandmedicineholidays.onrender.com",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      if (!origin || allowedOrigins.includes(origin))
+        return callback(null, true);
       console.warn("⚠️ Blocked by CORS:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
-  })
+  }),
 );
 
 // ✅ Ensure uploads folders exist
@@ -47,7 +48,7 @@ app.use(
   "uploads/packages",
   "uploads/bookings",
   "uploads/profiles",
-  "uploads/activities"
+  "uploads/activities",
 ].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -62,7 +63,7 @@ app.use(express.static(publicPath));
 
 // ✅ Import models
 ["User", "Package", "Activity", "Booking"].forEach((model) =>
-  require(`./models/${model}`)
+  require(`./models/${model}`),
 );
 
 // ✅ Import route files
@@ -77,7 +78,9 @@ app.use("/api/packages", packageRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
 
-console.log("✅ Routes mounted: /api/auth, /api/packages, /api/activities, /api/bookings");
+console.log(
+  "✅ Routes mounted: /api/auth, /api/packages, /api/activities, /api/bookings",
+);
 
 // ✅ Serve frontend (for non-API routes)
 app.get(/^\/(?!api).*/, (req, res) => {
@@ -93,8 +96,11 @@ app.use((err, req, res, next) => {
 });
 
 // ✅ Connect Database & Start Server
+const isMSSQL = process.env.DB_DIALECT === "mssql";
+const syncOptions = isMSSQL ? { force: true } : { alter: true };
+
 sequelize
-  .sync({ alter: true })
+  .sync(syncOptions)
   .then(() => {
     console.log("✅ Database connected & models synced successfully");
     const PORT = process.env.PORT || 5000;
@@ -104,5 +110,3 @@ sequelize
     });
   })
   .catch((err) => console.error("❌ Database connection error:", err));
-
-

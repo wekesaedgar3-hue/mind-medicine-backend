@@ -1,350 +1,654 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Dashboard | Mind & Medicine Holidays</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      margin: 0;
-      background: #f4f6f8;
-      color: #222;
-    }
-
-    header {
-      background: #1b4332;
-      color: #fff;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.2rem;
-    }
-
-    button {
-      background: #e63946;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 5px;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      padding: 2rem;
-    }
-
-    h2 {
-      color: #1b4332;
-      border-bottom: 2px solid #81c784;
-      padding-bottom: 0.5rem;
-      margin-top: 2rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-
-    th {
-      background: #1b4332;
-      color: #fff;
-    }
-
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .profile img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #1b4332;
-    }
-
-    /* ✅ Improved grid & card layout for better photo display */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .card {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 1rem;
-      background: #fafafa;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-    }
-
-    .card img {
-      width: 100%;
-      height: 220px; /* Increased image height */
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 0.7rem;
-    }
-
-    .card h4 {
-      margin: 0.5rem 0;
-      color: #1b4332;
-      font-size: 1.1rem;
-    }
-
-    .card p {
-      font-size: 0.95rem;
-      color: #555;
-      margin-bottom: 1rem;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal-content {
-      background: #fff;
-      padding: 1.5rem;
-      border-radius: 8px;
-      width: 320px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
-    input {
-      width: 100%;
-      padding: 8px;
-      margin: 8px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    @media (max-width: 600px) {
-      .card img {
-        height: 180px;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Dashboard | Mind & Medicine Holidays</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        margin: 0;
+        background: #f4f6f8;
+        color: #222;
       }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Mind & Medicine Holidays — User Dashboard</h1>
-    <button id="logoutBtn">Logout</button>
-  </header>
 
-  <div class="container">
-    <section class="profile-section">
-      <h2>Your Profile</h2>
-      <div class="profile">
-        <img id="profilePic" src="uploads/profiles/default.png" alt="Profile" />
-        <div>
-          <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
-          <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+      header {
+        background: #1b4332;
+        color: #fff;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      button {
+        background: #e63946;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 5px;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+      }
+
+      h2 {
+        color: #1b4332;
+        border-bottom: 2px solid #81c784;
+        padding-bottom: 0.5rem;
+        margin-top: 2rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+      }
+
+      th {
+        background: #1b4332;
+        color: #fff;
+      }
+
+      .profile {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .profile img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #1b4332;
+      }
+
+      /* ✅ Improved grid & card layout for better photo display */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+      }
+
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 1rem;
+        background: #fafafa;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+      }
+
+      .card img {
+        width: 100%;
+        height: 220px; /* Increased image height */
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 0.7rem;
+      }
+
+      .upload-form {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .upload-form label {
+        font-weight: 600;
+      }
+
+      .receipt-card {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: #f7fffa;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .receipt-card h3 {
+        margin-top: 0;
+        color: #1b4332;
+      }
+
+      .receipt-card p {
+        margin: 0.35rem 0;
+        color: #333;
+      }
+
+      .upload-form input,
+      .upload-form button,
+      .upload-form select {
+        width: auto;
+        max-width: 360px;
+      }
+
+      .card button {
+        width: auto;
+        padding: 10px 15px;
+      }
+
+      .modal-content select {
+        width: 100%;
+      }
+
+      .modal-content label {
+        display: block;
+        text-align: left;
+        margin-top: 10px;
+        font-weight: 600;
+      }
+
+      .modal-content input,
+      .modal-content select,
+      .modal-content button {
+        width: 100%;
+      }
+
+      .modal-content button {
+        margin-top: 10px;
+      }
+
+      .card h4 {
+        margin: 0.5rem 0;
+        color: #1b4332;
+        font-size: 1.1rem;
+      }
+
+      .card p {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 1rem;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .modal-content {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        width: 320px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      input {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+
+      @media (max-width: 600px) {
+        .card img {
+          height: 180px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Mind & Medicine Holidays — User Dashboard</h1>
+      <button id="logoutBtn">Logout</button>
+    </header>
+
+    <div class="container">
+      <section class="profile-section">
+        <h2>Your Profile</h2>
+        <div class="profile">
+          <img
+            id="profilePic"
+            src="uploads/profiles/default.png"
+            alt="Profile"
+          />
+          <div>
+            <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
+            <p>
+              <strong>Email:</strong> <span id="userEmail">Loading...</span>
+            </p>
+          </div>
         </div>
-      </div>
-    </section>
+        <form
+          id="uploadProfileForm"
+          class="upload-form"
+          enctype="multipart/form-data"
+        >
+          <label for="profilePicture">Upload profile picture</label>
+          <input type="file" id="profilePicture" accept="image/*" required />
+          <button type="submit">Update Profile Picture</button>
+        </form>
+      </section>
 
-    <section class="packages-section">
-      <h2>Available Packages</h2>
-      <div class="grid" id="packagesGrid">Loading packages...</div>
-    </section>
+      <section class="packages-section">
+        <h2>Available Packages</h2>
+        <div class="grid" id="packagesGrid">Loading packages...</div>
+      </section>
 
-    <section class="activities-section">
-      <h2>Available Activities</h2>
-      <div class="grid" id="activitiesGrid">Loading activities...</div>
-    </section>
+      <section class="activities-section">
+        <h2>Available Activities</h2>
+        <div class="grid" id="activitiesGrid">Loading activities...</div>
+      </section>
 
-    <section class="bookings-section">
-      <h2>Your Bookings</h2>
-      <table>
-        <thead><tr><th>Package</th><th>Date</th><th>Status</th></tr></thead>
-        <tbody id="bookingsBody"><tr><td colspan="3">Loading...</td></tr></tbody>
-      </table>
-    </section>
-  </div>
-
-  <!-- Booking Modal -->
-  <div class="modal" id="bookingModal">
-    <div class="modal-content">
-      <h3>Book Package</h3>
-      <p id="modalPackageName"></p>
-      <input type="date" id="bookingDate" required />
-      <button id="confirmBookingBtn">Confirm Booking</button>
-      <button onclick="closeModal()">Cancel</button>
+      <section class="bookings-section">
+        <h2>Your Bookings</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Booking</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsBody">
+            <tr>
+              <td colspan="5">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="bookingReceipt" class="receipt-card" style="display: none">
+          <h3>Latest Booking Receipt</h3>
+          <p id="receiptBookingTitle"></p>
+          <p id="receiptBookingDate"></p>
+          <p id="receiptBookingType"></p>
+          <p id="receiptBookingAmount"></p>
+          <p id="receiptPaymentMethod"></p>
+          <p id="receiptPaymentIdentifier"></p>
+          <p id="receiptTransactionReference"></p>
+          <p id="receiptBookingStatus"></p>
+        </div>
+      </section>
     </div>
-  </div>
 
-  <!-- ✅ Full Dashboard Script -->
-  <script>
-  const API_BASE = "https://mindandmedicineholidays.onrender.com/api";
-  const session = JSON.parse(localStorage.getItem("session"));
-  let currentUser = session?.user || null;
+    <!-- Booking Modal -->
+    <div class="modal" id="bookingModal">
+      <div class="modal-content">
+        <h3 id="modalTitle">Book Package</h3>
+        <p id="modalPackageName"></p>
+        <label for="bookingDate">Booking date</label>
+        <input type="date" id="bookingDate" required />
+        <label for="paymentMethod">Payment method</label>
+        <select id="paymentMethod">
+          <option value="mpesa">M-PESA</option>
+          <option value="account">Account</option>
+        </select>
+        <p
+          id="paymentHelpText"
+          style="
+            margin: 0.5rem 0 0 0;
+            font-size: 0.95rem;
+            color: #444;
+            text-align: left;
+          "
+        >
+          A payment prompt will be sent to your phone when you confirm.
+        </p>
+        <label id="paymentIdentifierLabel" for="paymentIdentifier"
+          >Enter phone number</label
+        >
+        <input
+          type="text"
+          id="paymentIdentifier"
+          placeholder="e.g. +254712345678"
+          required
+        />
+        <label for="paymentPin">Enter MPESA / account PIN</label>
+        <input type="password" id="paymentPin" placeholder="PIN" required />
+        <button id="confirmBookingBtn">Confirm Payment & Book</button>
+        <button type="button" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
 
-  if (!session || !session.token) {
-    alert("Session expired. Please log in again.");
-    window.location.href = "login.html";
-  }
+    <!-- ✅ Full Dashboard Script -->
+    <script>
+      const API_BASE =
+        window.location.origin === "null" ||
+        window.location.origin.startsWith("http://localhost") ||
+        window.location.origin.startsWith("http://127.0.0.1")
+          ? "http://localhost:5000/api"
+          : "https://mindandmedicineholidays.onrender.com/api";
+      const session = JSON.parse(localStorage.getItem("session"));
+      let currentUser = session?.user || null;
+      let paymentProviderInfo = null;
 
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${session.token}`,
-  };
+      // ✅ Session & role check
+      if (!session || !session.token || session.user?.role === "admin") {
+        alert("You must be logged in as a regular user!");
+        window.location.href = "login.html";
+      }
 
-  // ✅ Load profile
-  async function loadProfile() {
-    try {
-      const res = await fetch(`${API_BASE}/auth/me`, { headers });
-      if (res.ok) currentUser = await res.json();
-    } catch (err) {
-      console.warn("Falling back to session user:", err);
-    }
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.token}`,
+      };
 
-    document.getElementById("userName").textContent = currentUser.fullName || "N/A";
-    document.getElementById("userEmail").textContent = currentUser.email || "N/A";
-    document.getElementById("profilePic").src = currentUser.profilePicture 
-      ? `${API_BASE.replace("/api","")}/${currentUser.profilePicture}` 
-      : "uploads/profiles/default.png";
-  }
+      // ✅ Load profile
+      async function loadProfile() {
+        try {
+          const res = await fetch(`${API_BASE}/auth/me`, { headers });
+          if (res.ok) currentUser = await res.json();
+        } catch (err) {
+          console.warn("Falling back to session user:", err);
+        }
 
-  // ✅ Load packages
-  async function loadPackages() {
-    const grid = document.getElementById("packagesGrid");
-    try {
-      const res = await fetch(`${API_BASE}/packages`);
-      const data = await res.json();
-      grid.innerHTML = data.length
-        ? data.map(p => `
+        document.getElementById("userName").textContent =
+          currentUser.fullName || "N/A";
+        document.getElementById("userEmail").textContent =
+          currentUser.email || "N/A";
+        document.getElementById("profilePic").src = currentUser.profilePicture
+          ? `${API_BASE.replace("/api", "")}/${currentUser.profilePicture}`
+          : "uploads/profiles/default.png";
+      }
+
+      // ✅ Load packages
+      async function loadPackages() {
+        const grid = document.getElementById("packagesGrid");
+        try {
+          const res = await fetch(`${API_BASE}/packages`);
+          const data = await res.json();
+          grid.innerHTML = data.length
+            ? data
+                .map(
+                  (p) => `
           <div class="card">
-            <img src="${API_BASE.replace("/api","")}/${p.image || "uploads/default.jpg"}" alt="${p.title}" />
+            <img src="${API_BASE.replace("/api", "")}/${p.image || "uploads/default.jpg"}" alt="${p.title}" />
             <h4>${p.title}</h4>
             <p>${p.description || ""}</p>
-            <button onclick="openBookingModal('${p.id}','${p.title}')">Book Now</button>
-          </div>`).join("")
-        : "<p>No packages available.</p>";
-    } catch {
-      grid.innerHTML = "<p>Error loading packages.</p>";
-    }
-  }
+            <button onclick="openBookingModal('${p.id}','${p.title}','package')">Book Package</button>
+          </div>`,
+                )
+                .join("")
+            : "<p>No packages available.</p>";
+        } catch {
+          grid.innerHTML = "<p>Error loading packages.</p>";
+        }
+      }
 
-  // ✅ Load activities
-  async function loadActivities() {
-    const grid = document.getElementById("activitiesGrid");
-    try {
-      const res = await fetch(`${API_BASE}/activities`);
-      const data = await res.json();
-      grid.innerHTML = data.length
-        ? data.map(a => `
+      // ✅ Load activities
+      async function loadActivities() {
+        const grid = document.getElementById("activitiesGrid");
+        try {
+          const res = await fetch(`${API_BASE}/activities`);
+          const data = await res.json();
+          grid.innerHTML = data.length
+            ? data
+                .map(
+                  (a) => `
           <div class="card">
-            <img src="${API_BASE.replace("/api","")}/${a.image || "uploads/default.jpg"}" alt="${a.name}" />
+            <img src="${API_BASE.replace("/api", "")}/${a.image || "uploads/default.jpg"}" alt="${a.name}" />
             <h4>${a.name}</h4>
             <p>${a.description || ""}</p>
-          </div>`).join("")
-        : "<p>No activities available.</p>";
-    } catch {
-      grid.innerHTML = "<p>Error loading activities.</p>";
-    }
-  }
+            <button onclick="openBookingModal('${a.id}','${a.name}','activity')">Book Activity</button>
+          </div>`,
+                )
+                .join("")
+            : "<p>No activities available.</p>";
+        } catch {
+          grid.innerHTML = "<p>Error loading activities.</p>";
+        }
+      }
 
-  // ✅ Load bookings
-  async function loadBookings() {
-    const body = document.getElementById("bookingsBody");
-    try {
-      const res = await fetch(`${API_BASE}/bookings/my-bookings`, { headers });
-      const data = await res.json();
-      body.innerHTML = Array.isArray(data) && data.length
-        ? data.map(b => `
+      // ✅ Load bookings
+      async function loadBookings() {
+        const body = document.getElementById("bookingsBody");
+        try {
+          const res = await fetch(`${API_BASE}/bookings/my-bookings`, {
+            headers,
+          });
+          const data = await res.json();
+          body.innerHTML =
+            Array.isArray(data) && data.length
+              ? data
+                  .map(
+                    (b) => `
           <tr>
-            <td>${b.Package?.title || "—"}</td>
-            <td>${new Date(b.date || b.createdAt).toLocaleDateString()}</td>
+            <td>${b.Package?.title || b.Activity?.name || "—"}</td>
+            <td>${new Date(b.startDate || b.createdAt).toLocaleDateString()}</td>
             <td>${b.status || "Pending"}</td>
-          </tr>`).join("")
-        : `<tr><td colspan="3">No bookings yet.</td></tr>`;
-    } catch {
-      body.innerHTML = `<tr><td colspan="3">Error loading bookings.</td></tr>`;
-    }
-  }
+            <td>${b.paymentMethod?.toUpperCase() || "—"}</td>
+            <td>${b.transactionReference || "—"}</td>
+          </tr>`,
+                  )
+                  .join("")
+              : `<tr><td colspan="5">No bookings yet.</td></tr>`;
+        } catch {
+          body.innerHTML = `<tr><td colspan="5">Error loading bookings.</td></tr>`;
+        }
+      }
 
-  // ✅ Booking modal
-  let selectedPackageId = null;
-  function openBookingModal(id, name) {
-    selectedPackageId = id;
-    document.getElementById("modalPackageName").textContent = name;
-    document.getElementById("bookingModal").style.display = "flex";
-  }
-  function closeModal() {
-    document.getElementById("bookingModal").style.display = "none";
-  }
+      // ✅ Booking modal
+      let selectedBookingId = null;
+      let selectedBookingType = "package";
+      function openBookingModal(id, name, type) {
+        selectedBookingId = id;
+        selectedBookingType = type;
+        document.getElementById("modalTitle").textContent =
+          type === "activity" ? "Book Activity" : "Book Package";
+        document.getElementById("modalPackageName").textContent = name;
+        document.getElementById("paymentMethod").value = "mpesa";
+        document.getElementById("paymentIdentifierLabel").textContent =
+          "Enter phone number";
+        document.getElementById("paymentIdentifier").placeholder =
+          "e.g. +254712345678";
+        document.getElementById("paymentIdentifier").value = "";
+        document.getElementById("paymentPin").value = "";
+        updatePaymentHelpText("mpesa");
+        document.getElementById("bookingModal").style.display = "flex";
+      }
+      function closeModal() {
+        document.getElementById("bookingModal").style.display = "none";
+      }
 
-  // ✅ Confirm booking
-  document.getElementById("confirmBookingBtn").addEventListener("click", async () => {
-    const date = document.getElementById("bookingDate").value;
-    if (!date) return alert("Please select a booking date.");
-    if (!currentUser) return alert("User not loaded. Please refresh.");
+      function updatePaymentHelpText(method) {
+        const baseText =
+          method === "mpesa"
+            ? "A payment prompt will be sent to your phone when you confirm."
+            : "An account-based payment will be processed using the number above.";
+        document.getElementById("paymentHelpText").textContent =
+          paymentProviderInfo && paymentProviderInfo.enabled
+            ? `${paymentProviderInfo.providerLabel}: ${baseText}`
+            : baseText;
+      }
 
-    try {
-      const res = await fetch(`${API_BASE}/bookings`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ userId: currentUser.id, packageId: selectedPackageId, date }),
+      async function loadPaymentProviderInfo() {
+        try {
+          const res = await fetch(`${API_BASE}/bookings/provider-info`, {
+            headers,
+          });
+          if (!res.ok) return;
+          paymentProviderInfo = await res.json();
+          updatePaymentHelpText(
+            document.getElementById("paymentMethod").value || "mpesa",
+          );
+        } catch (err) {
+          console.warn("Payment provider info unavailable:", err);
+        }
+      }
+
+      document
+        .getElementById("paymentMethod")
+        .addEventListener("change", (e) => {
+          const method = e.target.value;
+          const label = document.getElementById("paymentIdentifierLabel");
+          const input = document.getElementById("paymentIdentifier");
+          if (method === "mpesa") {
+            label.textContent = "Enter phone number";
+            input.placeholder = "e.g. +254712345678";
+          } else {
+            label.textContent = "Enter account number";
+            input.placeholder = "e.g. 1234567890";
+          }
+          updatePaymentHelpText(method);
+        });
+
+      // ✅ Upload profile picture
+      document
+        .getElementById("uploadProfileForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const fileInput = document.getElementById("profilePicture");
+          if (!fileInput.files.length) {
+            return alert("Please choose a profile picture.");
+          }
+
+          const formData = new FormData();
+          formData.append("profilePicture", fileInput.files[0]);
+
+          try {
+            const res = await fetch(`${API_BASE}/auth/profile-picture`, {
+              method: "POST",
+              headers: { Authorization: `Bearer ${session.token}` },
+              body: formData,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Upload failed");
+
+            currentUser = data.user;
+            const updatedSession = { token: session.token, user: currentUser };
+            localStorage.setItem("session", JSON.stringify(updatedSession));
+            document.getElementById("profilePic").src =
+              `${API_BASE.replace("/api", "")}/${currentUser.profilePicture}`;
+            alert("✅ Profile picture updated successfully!");
+          } catch (error) {
+            console.error(error);
+            alert("❌ Failed to upload profile picture.");
+          }
+        });
+
+      // ✅ Confirm booking
+      document
+        .getElementById("confirmBookingBtn")
+        .addEventListener("click", async () => {
+          const date = document.getElementById("bookingDate").value;
+          const paymentMethod = document.getElementById("paymentMethod").value;
+          const paymentIdentifier = document
+            .getElementById("paymentIdentifier")
+            .value.trim();
+          const paymentPin = document.getElementById("paymentPin").value.trim();
+
+          if (!date) return alert("Please select a booking date.");
+          if (!paymentIdentifier)
+            return alert(
+              `Please enter your ${
+                paymentMethod === "mpesa" ? "phone number" : "account number"
+              }.`,
+            );
+          if (!paymentPin) return alert("Please enter your payment PIN.");
+          if (!currentUser) return alert("User not loaded. Please refresh.");
+
+          const payload = {
+            date,
+            paymentMethod,
+            paymentPin,
+          };
+          if (paymentMethod === "mpesa")
+            payload.phoneNumber = paymentIdentifier;
+          else payload.accountNumber = paymentIdentifier;
+          if (selectedBookingType === "activity")
+            payload.activityId = selectedBookingId;
+          else payload.packageId = selectedBookingId;
+
+          try {
+            const res = await fetch(`${API_BASE}/bookings`, {
+              method: "POST",
+              headers,
+              body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Booking failed");
+
+            alert("✅ Booking successful and payment processed!");
+            closeModal();
+            loadBookings();
+            showBookingReceipt(data.booking);
+          } catch (err) {
+            console.error(err);
+            alert(`❌ ${err.message || "Failed to book."}`);
+          }
+        });
+
+      function showBookingReceipt(booking) {
+        if (!booking) return;
+        const title =
+          booking.Package?.title || booking.Activity?.name || "Booking";
+        document.getElementById("receiptBookingTitle").textContent =
+          `Booking: ${title}`;
+        document.getElementById("receiptBookingDate").textContent =
+          `Date: ${new Date(booking.startDate || booking.createdAt).toLocaleDateString()}`;
+        document.getElementById("receiptBookingType").textContent =
+          `Type: ${booking.bookingType || "N/A"}`;
+        document.getElementById("receiptBookingAmount").textContent =
+          `Amount: ${booking.amount ? `KES ${booking.amount}` : "N/A"}`;
+        document.getElementById("receiptPaymentMethod").textContent =
+          `Payment method: ${booking.paymentMethod || "N/A"}`;
+        document.getElementById("receiptPaymentIdentifier").textContent =
+          booking.paymentPhoneNumber
+            ? `Phone number: ${booking.paymentPhoneNumber}`
+            : booking.paymentAccountNumber
+              ? `Account number: ${booking.paymentAccountNumber}`
+              : "";
+        document.getElementById("receiptTransactionReference").textContent =
+          `Transaction reference: ${booking.transactionReference || "N/A"}`;
+        document.getElementById("receiptBookingStatus").textContent =
+          `Status: ${booking.status || "Pending"}`;
+        document.getElementById("bookingReceipt").style.display = "block";
+      }
+
+      function logout() {
+        localStorage.removeItem("session");
+        window.location.href = "login.html";
+      }
+      document.getElementById("logoutBtn").addEventListener("click", logout);
+
+      // ✅ Initialize dashboard
+      loadProfile().then(() => {
+        loadPaymentProviderInfo();
+        loadPackages();
+        loadActivities();
+        loadBookings();
       });
-      if (!res.ok) throw new Error("Booking failed");
-      alert("✅ Booking successful!");
-      closeModal();
-      loadBookings();
-    } catch {
-      alert("❌ Failed to book package.");
-    }
-  });
-
-  function logout() {
-    localStorage.removeItem("session");
-    window.location.href = "login.html";
-  }
-  document.getElementById("logoutBtn").addEventListener("click", logout);
-
-  // ✅ Initialize dashboard
-  loadProfile().then(() => {
-    loadPackages();
-    loadActivities();
-    loadBookings();
-  });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
-

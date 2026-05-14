@@ -20,7 +20,9 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const extname = allowedTypes.test(
+      path.extname(file.originalname).toLowerCase(),
+    );
     const mimetype = allowedTypes.test(file.mimetype);
     if (extname && mimetype) cb(null, true);
     else cb(new Error("Only images are allowed!"));
@@ -28,7 +30,7 @@ const upload = multer({
 });
 
 // ✅ Public routes
-router.post("/register", upload.single("profilePic"), authController.register);
+router.post("/register", authController.register);
 router.post("/login", authController.login);
 
 // ✅ Authenticated route (to verify current session)
@@ -37,7 +39,7 @@ router.get("/me", authenticate, async (req, res) => {
     const user = req.user; // this comes from authenticate middleware
     res.json({
       id: user.id,
-      fullName: user.fullName,          // <-- now always returns fullName
+      fullName: user.fullName, // <-- now always returns fullName
       email: user.email,
       role: user.role,
       profilePicture: user.profilePicture || null,
@@ -48,13 +50,39 @@ router.get("/me", authenticate, async (req, res) => {
   }
 });
 
+router.post(
+  "/profile-picture",
+  authenticate,
+  upload.single("profilePicture"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No profile picture uploaded" });
+      }
+
+      const profilePicture = `uploads/profiles/${req.file.filename}`;
+      await req.user.update({ profilePicture });
+
+      res.json({
+        message: "Profile picture updated successfully",
+        user: {
+          id: req.user.id,
+          fullName: req.user.fullName,
+          email: req.user.email,
+          role: req.user.role,
+          profilePicture,
+        },
+      });
+    } catch (err) {
+      console.error("Error uploading profile picture:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
 // ✅ Example admin route
 router.get("/admin-only", authenticate, isAdmin, (req, res) => {
   res.json({ message: "Welcome, admin!" });
 });
 
 module.exports = router;
-
-
-
-
