@@ -1,104 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register | Mind & Medicine Holidays</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f4f8fb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 320px;
-    }
-    h2 {
-      text-align: center;
-      color: #2a4d69;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      background: #2a4d69;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #1e3b52;
-    }
-    .link {
-      text-align: center;
-      margin-top: 10px;
-    }
-    .link a {
-      text-decoration: none;
-      color: #2a4d69;
-    }
-    .link a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Create Account</h2>
-    <form id="registerForm">
-      <input type="text" id="name" placeholder="Full Name" required />
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Register</button>
-    </form>
-    <p class="link">
-      <a href="login.html">Already have an account? Login</a>
-    </p>
-  </div>
-
-  <script>
-    const API_BASE = "";
-
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      if(!name || !email || !password){
-        alert("⚠️ Please fill all fields.");
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register | Mind & Medicine Holidays</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f4f8fb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
       }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 320px;
+      }
+      h2 {
+        text-align: center;
+        color: #2a4d69;
+      }
+      input,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+      button {
+        background: #2a4d69;
+        color: white;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #1e3b52;
+      }
+      .link {
+        text-align: center;
+        margin-top: 10px;
+      }
+      .link a {
+        text-decoration: none;
+        color: #2a4d69;
+      }
+      .link a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Create Account</h2>
+      <form id="registerForm">
+        <input type="text" id="name" placeholder="Full Name" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <select id="role" required>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button type="submit">Register</button>
+      </form>
+      <p class="link">
+        <a href="login.html">Already have an account? Login</a>
+      </p>
+    </div>
 
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fullName: name, email, password })
+    <script>
+      const API_BASE =
+        window.location.origin === "null" ||
+        window.location.origin.startsWith("http://localhost") ||
+        window.location.origin.startsWith("http://127.0.0.1")
+          ? "http://localhost:5000"
+          : window.location.origin;
+
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.getElementById("name").value.trim();
+          const email = document.getElementById("email").value.trim();
+          const password = document.getElementById("password").value.trim();
+          const role = document.getElementById("role").value;
+
+          if (!name || !email || !password) {
+            alert("⚠️ Please fill all fields.");
+            return;
+          }
+
+          try {
+            console.log("API_BASE:", API_BASE);
+            console.log("Registering with role:", role);
+            const res = await fetch(`${API_BASE}/api/auth/register`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ fullName: name, email, password, role }),
+            });
+            const data = await res.json();
+            if (res.ok && data.token && data.user) {
+              alert("✅ Registration successful! Redirecting...");
+              const session = { token: data.token, user: data.user };
+              localStorage.setItem("session", JSON.stringify(session));
+              localStorage.setItem("token", data.token);
+              localStorage.setItem("role", data.user.role.toLowerCase());
+              localStorage.setItem("mmh_user", JSON.stringify(data.user));
+
+              if (data.user.role.toLowerCase() === "admin") {
+                window.location.href = "admin-dashboard.html";
+              } else {
+                window.location.href = "user-dashboard.html";
+              }
+            } else {
+              alert(`❌ ${data.message || "Registration failed."}`);
+            }
+          } catch (err) {
+            alert("⚠️ Error connecting to backend.");
+          }
         });
-        const data = await res.json();
-        if (res.ok) {
-          alert("✅ Registration successful! You are now logged in.");
-          localStorage.setItem("mmh_user", JSON.stringify(data.user));
-          window.location.href = "index.html";
-        } else {
-          alert(`❌ ${data.message || "Registration failed."}`);
-        }
-      } catch (err) {
-        alert("⚠️ Error connecting to backend.");
-      }
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
-

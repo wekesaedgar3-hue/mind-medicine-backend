@@ -7,14 +7,15 @@ const generateToken = (user) => {
   return jwt.sign(
     { id: user.id, role: user.role },
     process.env.JWT_SECRET,
-    { expiresIn: "7d" } // 7 days
+    { expiresIn: "7d" }, // 7 days
   );
 };
 
 // Register user
 exports.register = async (req, res) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, role } = req.body;
+    console.log("Register request received. Role:", role);
 
     if (!fullName || !email || !password)
       return res.status(400).json({ message: "All fields are required" });
@@ -23,15 +24,20 @@ exports.register = async (req, res) => {
     if (existing)
       return res.status(400).json({ message: "Email already registered" });
 
+    const normalizedRole =
+      role && role.toLowerCase() === "admin" ? "admin" : "user";
+
     const hashed = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       fullName,
       email,
       password: hashed,
-      role: "user",
+      role: normalizedRole,
       profilePicture: req.file ? `uploads/profiles/${req.file.filename}` : null,
     });
+
+    console.log("User created with role:", user.role);
 
     const token = generateToken(user);
 
@@ -64,9 +70,12 @@ exports.login = async (req, res) => {
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     const token = generateToken(user);
+
+    console.log("Login successful for user:", user.email, "role:", user.role);
 
     res.json({
       message: "Login successful",
@@ -97,8 +106,3 @@ exports.getMe = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
-
-
-
